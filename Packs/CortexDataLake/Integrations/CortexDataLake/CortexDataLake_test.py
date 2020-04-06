@@ -50,7 +50,9 @@ def test_query_timestamp(args, expected_response, test_case):
 def test_parse_tree_by_root_to_leaf_paths():
     from CortexDataLake import parse_tree_by_root_to_leaf_paths
     root = 'a'
-    body = {'b': 2, 'c': 3, 'd': {'e': 5, 'f': 6, 'g': {'h': 8, 'i': 9}}}
+    body = {'b': 2,
+            'c': 3,
+            'd': {'e': 5, 'f': 6, 'g': {'h': 8, 'i': 9}}}
     expected_output = {'a.b': 2, 'a.c': 3, 'a.d.e': 5, 'a.d.f': 6, 'a.d.g.h': 8, 'a.d.g.i': 9}
     assert expected_output == parse_tree_by_root_to_leaf_paths(root, body)
 
