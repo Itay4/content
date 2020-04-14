@@ -36,7 +36,7 @@ configuration:
   name: proxy
   defaultvalue: ""
   type: 8
-  required: true
+  required: false
 - display: 'Comma-separated list of threat behaviors to generate incidents for, e.g.,
     "Exfiltration: SSL upload from non-browser to notable domain, Lateral Movement:
     Unix-based PSEXEC, C2: Possible ICMP tunnel"'
