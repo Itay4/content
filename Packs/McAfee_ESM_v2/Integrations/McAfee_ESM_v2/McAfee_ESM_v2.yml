@@ -738,6 +738,7 @@ script:
   script: '-'
   subtype: python3
   type: python
+fromversion: 5.0.0
 tests:
 - McAfee ESM v2 - Test
 - McAfee ESM v2 (v11.3) - Test
