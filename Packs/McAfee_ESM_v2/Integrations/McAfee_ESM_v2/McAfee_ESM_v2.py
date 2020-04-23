@@ -7,7 +7,6 @@ import time
 
 
 disable_warnings()
-INTEGRATION_NAME = 'McAfee ESM v2'
 CONTEXT_INTEGRATION_NAME = 'McAfeeESM.'
 
 
@@ -37,7 +36,7 @@ class McAfeeESMClient(BaseClient):
     def __del__(self):
         self.__logout()
 
-    def _is_status_code_valid(self, response, ok_codes=None):
+    def _is_status_code_valid(self, *other):    # noqa
         return True
 
     def __request(self, mcafee_command, data=None, params=None):
