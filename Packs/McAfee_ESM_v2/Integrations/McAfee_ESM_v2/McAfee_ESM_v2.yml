@@ -1,6 +1,6 @@
 category: Analytics & SIEM
 commonfields:
-  id: McAfee ESM_v2
+  id: McAfee ESM v2
   version: -1
 configuration:
 - display: ESM IP (e.g. 78.125.0.209)
@@ -78,7 +78,7 @@ configuration:
 description: Run queries and receive alarms from Intel Security ESM. Support version
   10 and above.
 display: McAfee ESM v2
-name: McAfee ESM_v2
+name: McAfee ESM v2
 script:
   commands:
   - deprecated: false
