@@ -16,8 +16,8 @@ class McAfeeESMClient(BaseClient):
 
     def __init__(self, params: Dict):
         self.args = demisto.args()
-        self.__user_name = params.get('credentials', {}).get('identifier')
-        self.__password = params.get('credentials', {}).get('password')
+        self.__user_name = params.get('credentials', {}).get('identifier', '')
+        self.__password = params.get('credentials', {}).get('password', '')
         self.difference = int(params.get('timezone', 0))
         self.version = params.get('version', '10.2')
         super(McAfeeESMClient, self).__init__(
@@ -623,8 +623,8 @@ def filtering_incidents(incidents_list: List, start_id: int, limit: int = 1):
 
 def expected_errors(error: DemistoException) -> bool:
     expected_error: List[str] = [
-        'qryGetResults failed with error[Error deserializing EsmQueryResults, see logs for more information '
-        '(Error deserializing EsmQueryResults, see logs for more information '
+        'qryGetResults failed with error[Error deserializing EsmQueryResults, see logs for more information ' +  # noqa: W504
+        '(Error deserializing EsmQueryResults, see logs for more information ' +  # noqa: W504
         '(Internal communication error, see logs for more details))].',
         'alarmUnacknowledgeTriggeredAlarm failed with error[ERROR_BadRequest (60)].',
         'alarmAcknowledgeTriggeredAlarm failed with error[ERROR_BadRequest (60)].'
