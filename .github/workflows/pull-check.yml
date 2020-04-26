@@ -4,20 +4,20 @@ on:
     types: [opened, synchronize, reopened, labeled, unlabeled]
 
 jobs:
-  check:
+  docs_review:
     runs-on: ubuntu-latest
     steps:
-      - name: Check Docs
+      - name: Check Documentation Review
         id: check_docs
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
-          echo "$GITHUB_CONTEXT"
+          # echo "$GITHUB_CONTEXT"  # uncomment to print the context for debug
           DOC_APPROVED=$(echo "$GITHUB_CONTEXT" | jq -c '.event.pull_request.labels[] | select(.name | contains("docs-approved"))')
           if [ -n "$DOC_APPROVED" ]; then
-            echo "Doc approved tag found: $DOC_APPROVED"
+            echo "Documentation Review - APPROVED. Tag found: $DOC_APPROVED"
             exit 0
           else
-            echo "Doc approved tag not found"
+            echo "Documentation Review - PENDING."
             exit 1
           fi
