@@ -1,7 +1,7 @@
 name: Demisto Pull Check
 on:
   pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+    types: [opened, reopened, labeled, unlabeled]
 
 jobs:
   docs_review:
@@ -12,7 +12,6 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
-          # echo "$GITHUB_CONTEXT"  # uncomment to print the context for debug
           DOC_APPROVED=$(echo "$GITHUB_CONTEXT" | jq -c '.event.pull_request.labels[] | select(.name | contains("docs-approved"))')
           if [ -n "$DOC_APPROVED" ]; then
             echo "Documentation Review - APPROVED. Tag found: $DOC_APPROVED"
