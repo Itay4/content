@@ -1,7 +1,7 @@
 name: Demisto Pull Check
 on:
   pull_request:
-    types: [opened, reopened, labeled, unlabeled]
+    types: [opened, reopened, synchronize, labeled, unlabeled]
 
 jobs:
   docs_review:
