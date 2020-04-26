@@ -13,7 +13,7 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
           echo "$GITHUB_CONTEXT"
-          DOC_APPROVED=$(echo $GITHUB_CONTEXT" | jq -c '.event.pull_request.labels[] | select(.name | contains("docs-approved"))')
+          DOC_APPROVED=$(echo "$GITHUB_CONTEXT" | jq -c '.event.pull_request.labels[] | select(.name | contains("docs-approved"))')
           if [ -n "$DOC_APPROVED" ]; then
             echo "Doc approved tag found: $DOC_APPROVED"
             exit 0
