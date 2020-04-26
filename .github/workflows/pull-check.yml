@@ -12,6 +12,7 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
+          # Check that the docs-approved tag is present
           DOC_APPROVED=$(echo "$GITHUB_CONTEXT" | jq -c '.event.pull_request.labels[] | select(.name | contains("docs-approved"))')
           if [ -n "$DOC_APPROVED" ]; then
             echo "Documentation Review - APPROVED. Tag found: $DOC_APPROVED"
