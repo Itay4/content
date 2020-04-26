@@ -26,7 +26,9 @@ authTokenRequest = {
 authTokenResponse = requests.post(prefix + "/authtoken", json=authTokenRequest, verify=verify)
 authToken = authTokenResponse.json()["token"]["value"]
 headers = {
-    "Authentication": ("access " + authToken)
+    "Authentication": ("access " + authToken),
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, '
+                  'like Gecko) Chrome/76.0.3809.132 Safari/537.36'
 }
 command = demisto.command()
 args = demisto.args()
