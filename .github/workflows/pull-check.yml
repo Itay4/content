@@ -1,0 +1,23 @@
+name: Demisto Pull Check
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Docs
+        id: check_docs
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
+          echo "$GITHUB_CONTEXT"
+          DOC_APPROVED=$(echo $GITHUB_CONTEXT" | jq -c '.event.pull_request.labels[] | select(.name | contains("docs-approved"))')
+          if [ -n "$DOC_APPROVED" ]; then
+            echo "Doc approved tag found: $DOC_APPROVED"
+            exit 0
+          else
+            echo "Doc approved tag not found"
+            exit 1
+          fi
