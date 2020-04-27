@@ -1,6 +1,6 @@
 {
-    "name": "## FILL OUT MANUALLY ##",
-    "description": "## FILL OUT MANUALLY ##",
+    "name": "IBM Resilient Systems",
+    "description": "Case management that enables visibility across your tools for continual\n  IR improvement",
     "support": "xsoar",
     "serverMinVersion": "1.0.0",
     "currentVersion": "1.0.0",
