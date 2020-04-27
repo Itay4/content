@@ -59,7 +59,7 @@ class McAfeeESMClient(BaseClient):
             'locale': 'en_US'
         }
         res = self._http_request('POST', 'login', data=json.dumps(params), resp_type='response', timeout=20)
-        self._headers['Cookie'] = 'JWTToken=' + res.cookies.get('JWTToken')
+        self._headers['Cookie'] = 'JWTToken={}'.format(res.cookies.get('JWTToken'))
         self._headers['X-Xsrf-Token'] = res.headers.get('Xsrf-Token')
         if None in (self._headers['X-Xsrf-Token'], self._headers['Cookie']):
             raise DemistoException(f'Failed login\nurl: {self._base_url}login\nresponse '
@@ -69,7 +69,7 @@ class McAfeeESMClient(BaseClient):
         self._http_request('DELETE', 'logout', resp_type='response')
 
     def test_module(self) -> Tuple[str, Dict, Dict]:
-        _, _, _ = self.get_organization_list(raw=True)
+        self.get_organization_list(raw=True)
         return 'ok', {}, {}
 
     def __username_and_id(self, user_name: str = None, user_id: str = None) -> Dict:
