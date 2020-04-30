@@ -31,7 +31,7 @@ FILE_IN_PACKS_INTEGRATIONS_DIR_REGEX = r'{}/([^/]+)/{}/(.+)'.format(
     PACKS_DIR, INTEGRATIONS_DIR)
 FILE_IN_PACKS_SCRIPTS_DIR_REGEX = r'{}/([^/]+)/{}/(.+)'.format(
     PACKS_DIR, SCRIPTS_DIR)
-
+CONF_REGEX = "./Tests/conf.json"
 
 TEST_DATA_INTEGRATION_YML_REGEX = r'Tests\/scripts\/infrastructure_tests\/tests_data\/mock_integrations\/.*\.yml'
 INTEGRATION_REGEXES = [
