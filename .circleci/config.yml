@@ -116,14 +116,7 @@ jobs:
           key: venv-{{ checksum "dev-requirements-py2.txt" }}-{{ checksum "dev-requirements-py3.txt" }}-{{ checksum ".circleci/build-requirements.txt" }}-{{ checksum "package-lock.json" }}
       - *add_ssh_keys
       - *persist_to_workspace
-      - run:
-          name: Verify Base Branch for Contribution
-          when: always
-          command: |
-            if [[ $CIRCLE_BRANCH =~ pull/[0-9]+ ]] ;
-              then
-                python3 ./Tests/scripts/verify_base_branch_for_contribution.py $CIRCLE_BRANCH
-            fi
+
   Check if circleci config is up to date:
     <<: *container_config
     resource_class: medium+
@@ -457,8 +450,6 @@ jobs:
       - *restore_cache
       - *add_ssh_keys
       - *prepare_environment
-      - *build_descriptor
-      - *create_artifact
       - run:
           name: Run Tests - Latest GA
           shell: /bin/bash
@@ -743,7 +734,7 @@ workflows:
             - pre-build
       - Verify Base Branch for Contribution:
           requires:
-            - pre-build
+            - Check if circleci config is up to date
       - Content Docs Site:
           requires:
             - pre-build
@@ -765,20 +756,18 @@ workflows:
       - Demisto PreGA:
           requires:
             - Create Instances
-      - Finish build:
+      - Finish Build:
           requires:
             - Latest GA
             - One Before GA
             - Two Before GA
             - Server Master
             - Demisto PreGA
-            - pre-build
-            - Check if circleci config is up to date
+            - Verify Base Branch for Contribution
             - Infrastructure testing
             - Secrets
             - Validate Files and Yaml
             - Spell Checks
             - Common Server Documentation
-            - Verify Base Branch for Contribution
             - Content Docs Site
             - Run Unit Testing and Lint
