@@ -18,6 +18,18 @@ name: SMIME Messaging
 script:
   commands:
   - arguments:
+    - description: Email addresses for the 'To' field
+      default: false
+      isArray: true
+      name: to
+      required: false
+      secret: false
+    - default: false
+      description: Subject for the email to be sent
+      isArray: false
+      name: subject
+      required: false
+      secret: false
     - default: false
       description: The message body to send.
       isArray: false
@@ -36,6 +48,18 @@ script:
       description: The S/MIME signing headers.
       type: String
   - arguments:
+    - description: Email addresses for the 'To' field
+      default: false
+      isArray: true
+      name: to
+      required: false
+      secret: false
+    - default: false
+      description: Subject for the email to be sent
+      isArray: false
+      name: subject
+      required: false
+      secret: false
     - default: false
       description: The message body to encrypt.
       isArray: false
@@ -81,6 +105,18 @@ script:
       description: The decrypted message.
       type: String
   - arguments:
+    - description: Email addresses for the 'To' field
+      default: false
+      isArray: true
+      name: to
+      required: false
+      secret: false
+    - default: false
+      description: Subject for the email to be sent
+      isArray: false
+      name: subject
+      required: false
+      secret: false
     - default: false
       description: The message body to encrypt and sign.
       isArray: false

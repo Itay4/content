@@ -39,6 +39,9 @@ def sign_email(client: Client, args: Dict):
     send a S/MIME-signed message via SMTP.
     """
     message_body = args.get('message_body', '')
+    to = args.get('to', '')
+    subject = args.get('subject', '')
+
     buf = makebuf(message_body.encode())
 
     client.smime.load_key(client.private_key_file, client.public_key_file)
@@ -47,6 +50,12 @@ def sign_email(client: Client, args: Dict):
     buf = makebuf(message_body.encode())
 
     out = BIO.MemoryBuffer()
+
+    if to:
+        out.write(f'To: {to.split(",")}\n')
+
+    if subject:
+        out.write(f'Subject: {subject}\n')
 
     client.smime.write(out, p7, buf, SMIME.PKCS7_TEXT)
     signed = out.read().decode('utf-8')
@@ -71,6 +80,9 @@ def encrypt_email_body(client: Client, args: Dict):
 
     """
     message_body = args.get('message', '').encode('utf-8')
+    to = args.get('to', '')
+    subject = args.get('subject', '')
+
     buf = makebuf(message_body)
 
     x509 = X509.load_cert(client.public_key_file)
@@ -80,6 +92,12 @@ def encrypt_email_body(client: Client, args: Dict):
     client.smime.set_cipher(SMIME.Cipher('des_ede3_cbc'))
     p7 = client.smime.encrypt(buf)
     out = BIO.MemoryBuffer()
+
+    if to:
+        out.write(f'To: {to.split(",")}\n')
+
+    if subject:
+        out.write(f'Subject: {subject}\n')
 
     client.smime.write(out, p7)
     encrypted_message = out.read().decode('utf-8')
@@ -153,6 +171,9 @@ def decrypt_email_body(client: Client, args: Dict, file_path=None):
 def sign_and_encrypt(client: Client, args: Dict):
 
     message = args.get('message', '').encode('utf-8')
+    to = args.get('to', '')
+    subject = args.get('subject', '')
+
     msg_bio = BIO.MemoryBuffer(message)
     sign = client.private_key_file
     encrypt = client.public_key_file
@@ -180,6 +201,13 @@ def sign_and_encrypt(client: Client, args: Dict):
         p7 = client.smime.encrypt(tmp_bio)
 
     out = BIO.MemoryBuffer()
+
+    if to:
+        out.write(f'To: {to.split(",")}\n')
+
+    if subject:
+        out.write(f'Subject: {subject}\n')
+
     if encrypt:
         client.smime.write(out, p7)
     else:
