@@ -125,7 +125,7 @@ script:
     execution: false
     name: activemq-subscribe
   dockerimage: demisto/stomp:latest
-  longRunning: false
+  longRunning: true
   longRunningPort: false
   isfetch: true
   runonce: false

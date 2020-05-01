@@ -120,7 +120,7 @@ script:
   dockerimage45: demisto/genericsql:1.0.0.6768
   dockerimage: demisto/genericsql:1.0.0.7446
   feed: false
-  isfetch: false
+  isfetch: true
   longRunning: false
   longRunningPort: false
   runonce: false
