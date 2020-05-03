@@ -626,6 +626,178 @@ class Client(BaseClient):
 
         return reply.get('reply').get('data', [])
 
+    def blacklist_files(self, hash_list, comment=None):
+        request_data: Dict[str, Any] = {}
+        request_data["hash_list"]: hash_list
+        if comment:
+            request_data["comment"]: comment
+
+        reply = self._http_request(
+            method='POST',
+            url_suffix='/hash_exceptions/blacklist/',
+            json_data={'request_data': request_data}
+        )
+        return reply.get('reply').get('data', [])
+
+    def whitelist_files(self, hash_list, comment=None):
+        request_data: Dict[str, Any] = {}
+        request_data["hash_list"]: hash_list
+        if comment:
+            request_data["comment"]: comment
+
+        reply = self._http_request(
+            method='POST',
+            url_suffix='/hash_exceptions/whitelist/',
+            json_data={'request_data': request_data}
+        )
+        return reply.get('reply').get('data', [])
+
+    def quarantine_files(self, endpoint_id_list, isolate, file_path, file_hash):
+        request_data: Dict[str, Any] = {}
+        filters = []
+        if endpoint_id_list:
+            filters.append({
+                'field': 'endpoint_id_list',
+                'operator': 'in',
+                'value': endpoint_id_list
+            })
+
+        if isolate:
+            filters.append({
+                'field': 'isolate',
+                'operator': 'in',
+                'value': endpoint_id_list
+            })
+        if filters:
+            request_data['filters'] = filters
+
+        request_data['file_path'] = file_path
+        request_data['file_hash'] = file_hash
+
+        reply = self._http_request(
+            method='POST',
+            url_suffix='/audits/endpoints/quarantine/',
+            json_data={'request_data': request_data}
+        )
+        return reply.get('reply').get('data', [])
+
+    def restore_file(self, file_hash, endpoint_id=None):
+        request_data: Dict[str, Any] = {}
+
+        request_data['file_hash'] = file_hash
+        if endpoint_id:
+            request_data['endpoint_id'] = endpoint_id
+
+        reply = self._http_request(
+            method='POST',
+            url_suffix='/endpoints/restore/',
+            json_data={'request_data': request_data}
+        )
+        return reply.get('reply').get('data', [])
+
+    def scan_endpoints(self, endpoint_id_list=None, dist_name=None, gte_first_seen=None, gte_last_seen=None, lte_first_seen=None,
+                       lte_last_seen=None, ip_list=None, group_name=None, platform=None, alias=None, isolate=None, hostname=None):
+        # TODO: add in documentation: no params scans all endpoints
+
+        request_data: Dict[str, Any] = {}
+        filters = {}
+
+        if endpoint_id_list:
+            filters.append({
+                'field': 'endpoint_id_list',
+                'operator': 'in',
+                'value': endpoint_id_list
+            })
+
+        if dist_name:
+            filters.append({
+                'field': 'dist_name',
+                'operator': 'in',
+                'value': dist_name
+            })
+
+        if ip_list:
+            filters.append({
+                'field': 'ip_list',
+                'operator': 'in',
+                'value': ip_list
+            })
+
+        if group_name:
+            filters.append({
+                'field': 'group_name',
+                'operator': 'in',
+                'value': group_name
+            })
+
+        if platform:
+            filters.append({
+                'field': 'platform',
+                'operator': 'in',
+                'value': platform
+            })
+
+        if alias:
+            filters.append({
+                'field': 'alias_name',
+                'operator': 'in',
+                'value': alias
+            })
+
+        if isolate:
+            filters.append({
+                'field': 'isolate',
+                'operator': 'in',
+                'value': [isolate]
+            })
+
+        if hostname:
+            filters.append({
+                'field': 'hostname',
+                'operator': 'in',
+                'value': hostname
+            })
+
+        if gte_first_seen:
+            filters.append({
+                'field': 'first_seen',
+                'operator': 'gte',
+                'value': gte_first_seen
+            })
+
+        if lte_first_seen:
+            filters.append({
+                'field': 'first_seen',
+                'operator': 'lte',
+                'value': lte_first_seen
+            })
+
+        if gte_last_seen:
+            filters.append({
+                'field': 'last_seen',
+                'operator': 'gte',
+                'value': gte_last_seen
+            })
+
+        if lte_last_seen:
+            filters.append({
+                'field': 'last_seen',
+                'operator': 'lte',
+                'value': lte_last_seen
+            })
+
+        if filters:
+            request_data['filters'] = filters
+        else:
+            request_data['filters'] = 'all'
+
+        reply = self._http_request(
+            method='POST',
+            url_suffix='endpoints/scan/',
+            json_data={'request_data': request_data}
+        )
+        return reply.get('reply').get('data', [])
+
 
 def get_incidents_command(client, args):
     """
@@ -1262,6 +1434,81 @@ def create_distribution_command(client, args):
     )
 
 
+def blacklist_files_commands(client, args):
+    hash_list = args.get('hash_list')
+    comment = args.get('comment')
+
+    action_result = client.blacklist_files(hash_list=argToList(hash_list), comment=comment)
+    return action_result
+
+
+def whitelist_files_commands(client, args):
+    hash_list = args.get('hash_list')
+    comment = args.get('comment')
+
+    action_result = client.whitelist_files(hash_list=argToList(hash_list), comment=comment)
+    return action_result
+
+
+def quarantine_files_command(client, args):
+    endpoint_id_list = args.get("endpoint_id_list")
+    isolate = args.get("isolate")  # TODO: isolated / unisolated
+    file_path = args.get("file_path")
+    file_hash = args.get("file_hash")
+
+    action_result = client.quarantine_files(
+        endpoint_id_list=argToList(endpoint_id_list),
+        isolate=isolate,
+        file_path=file_path,
+        file_hash=file_hash
+    )
+
+    return action_result
+
+
+def restore_file_command(client, args):
+    file_hash = args.get('file_hash')
+    endpoint_id = args.get('endpoint_id')
+
+    action_result = client.quarantine_files(
+        file_hash=file_hash,
+        endpoint_id=endpoint_id
+    )
+
+    return action_result
+
+def endpoint_scan_command(client, args):
+    endpoint_id_list = args.get('endpoint_id_list')
+    dist_name = args.get('dist_name')
+    gte_first_seen = args.get('gte_first_seen')
+    gte_last_seen = args.get('gte_last_seen')
+    lte_first_seen = args.get('lte_first_seen')
+    lte_last_seen = args.get('lte_last_seen')
+    ip_list = args.get('ip_list')
+    group_name = args.get('group_name')
+    platform = args.get('platform')  # TODO: add selection menu: windows_linux_macos/android
+    alias = args.get('alias')
+    isolate = args.get('isolate')  # TODO: add selection menu: isolated/unisolated
+    hostname = args.get('hostname')
+
+    action_result = client.endpoint_scan(
+        endpoint_id_list=argToList(endpoint_id_list),
+        dist_name=dist_name,
+        gte_first_seen=gte_first_seen,
+        gte_last_seen=gte_last_seen,
+        lte_first_seen=lte_first_seen,
+        lte_last_seen=lte_last_seen,
+        ip_list=ip_list,
+        group_name=group_name,
+        platform=platform,
+        alias=alias,
+        isolate=isolate,
+        hostname=hostname
+    )
+
+    return action_result
+
+
 def fetch_incidents(client, first_fetch_time, last_run: dict = None):
     # Get the last fetch time, if exists
     last_fetch = last_run.get('time') if isinstance(last_run, dict) else None
@@ -1377,7 +1624,22 @@ def main():
         elif demisto.command() == 'xdr-get-audit-management-logs':
             return_outputs(*get_audit_management_logs_command(client, demisto.args()))
 
-        elif demisto.command() == 'xdr-get-audit-agent-reports':
+        elif demisto.command() == 'xdr-blacklist-files':
+            return_outputs(*get_audit_agent_reports_command(client, demisto.args()))
+
+        elif demisto.command() == 'xdr-whitelist-files':
+            return_outputs(*get_audit_agent_reports_command(client, demisto.args()))
+
+        elif demisto.command() == 'xdr-quarantine-file':
+            return_outputs(*get_audit_agent_reports_command(client, demisto.args()))
+
+        elif demisto.command() == 'xdr-get-quarantine-status':
+            return_outputs(*get_audit_agent_reports_command(client, demisto.args()))
+
+        elif demisto.command() == 'xdr-restore-file':
+            return_outputs(*get_audit_agent_reports_command(client, demisto.args()))
+
+        elif demisto.command() == 'xdr-endpoint-scan':
             return_outputs(*get_audit_agent_reports_command(client, demisto.args()))
 
     except Exception as err:
