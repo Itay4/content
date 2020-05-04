@@ -108,7 +108,7 @@ script:
       required: false
       secret: false
     - default: false
-      description: 'A comma-separated list of value, for example: 7,"foo",3.'
+      description: 'A Comma-separated list of value, for example: 7,"foo",3.'
       isArray: true
       name: bind_variables_values
       required: false
