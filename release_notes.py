@@ -652,12 +652,15 @@ def main():
                                                                               removed_files, tag=tag)
 
         for file_path in added_files:
+            print(f'checking {file_path}')
             create_file_release_notes('A', file_path)
 
         for file_path in modified_files:
+            print(f'checking {file_path}')
             create_file_release_notes('M', file_path)
 
         for file_path in removed_files:
+            print(f'checking {file_path}')
             # content entities are only yml/json files. ignore all the rest.
             if file_path.endswith('.yml') or file_path.endswith('.json'):
                 handle_deleted_file(file_path, tag)
