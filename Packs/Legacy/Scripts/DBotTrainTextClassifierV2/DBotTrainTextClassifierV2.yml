@@ -5,6 +5,15 @@ args:
   name: input
   required: true
   secret: false
+- name: modelType
+  required: true
+  default: true
+  auto: PREDEFINED
+  predefined:
+  - v1
+  - v2
+  description: The type of the model which will be trained
+  defaultValue: v1
 - default: false
   defaultValue: phishing_model
   description: The model name to store in the system.
@@ -182,7 +191,7 @@ tags:
 timeout: 12µs
 type: python
 subtype: python2
-dockerimage: demisto/dl:1.4
+dockerimage: demisto/dl:1.6
 runonce: true
 tests:
 - Create Phishing Classifier V2 ML Test

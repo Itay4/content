@@ -1,10 +1,9 @@
 # pylint: disable=no-member
-from collections import defaultdict, Counter
-from io import BytesIO, StringIO
-
 import demisto_ml
 import numpy as np
 import pandas as pd
+from collections import defaultdict, Counter
+from io import BytesIO, StringIO
 from sklearn.model_selection import StratifiedKFold
 
 from CommonServerPython import *
@@ -112,7 +111,7 @@ def get_data_with_mapped_label(data, labels_mapping, tag_field):
 
 
 def store_model_in_demisto(model_name, model_override, X, y, confusion_matrix):
-    model = demisto_ml.train_text_classifier(X, y, True)
+    model = demisto_ml.train_text_classifier(X, y, compress=True, model_type=model_type, load_pretrained=True)
     model_data = demisto_ml.encode_model(model)
     model_labels = demisto_ml.get_model_labels(model)
 
@@ -307,6 +306,7 @@ def get_X_and_y_from_data(data, text_field):
 
 def main():
     input = demisto.args()['input']
+    model_type = d_args['modelType'] if 'modelType' in d_args and d_args['modelType'] in ['v1', 'v2'] else 'v1'
     input_type = demisto.args()['inputType']
     model_name = demisto.args()['modelName']
     store_model = demisto.args()['storeModel'] == 'true'
@@ -349,7 +349,7 @@ def main():
     test_index, train_index = get_train_and_test_sets_indices(X, y)
     X_train, X_test = [X[i] for i in train_index], [X[i] for i in test_index]
     y_train, y_test = [y[i] for i in train_index], [y[i] for i in test_index]
-    model = demisto_ml.train_text_classifier(X_train, y_train)
+    model = demisto_ml.train_text_classifier(X_train, y_train, model_type=model_type, load_pretrained=True)
     ft_test_predictions = demisto_ml.predict(model, X_test)
     y_pred = [{y_tuple[0]: y_tuple[1]} for y_tuple in ft_test_predictions]
     if return_predictions_on_test_set:
