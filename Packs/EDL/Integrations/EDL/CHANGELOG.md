@@ -1,4 +1,5 @@
 ## [Unreleased]
+  - Added Request Parameters Through the URL
   - Removed `Long Running Instance` from instance configuration.
   - Set the listener host to 0.0.0.0 in order to handle IPv6.
 
