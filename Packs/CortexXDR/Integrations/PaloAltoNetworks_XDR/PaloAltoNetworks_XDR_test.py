@@ -1,6 +1,7 @@
 import json
 import pytest
 
+
 XDR_URL = 'https://api.xdrurl.com'
 
 
@@ -481,3 +482,95 @@ def test_create_distribution(requests_mock):
         }
     }
     assert readable_output == f'Distribution {expected_distribution_id} created successfully'
+
+
+@pytest.mark.parametrize(
+    "test_data",
+    [
+        (load_test_data('./test_data/blacklist_files_success.json'),),
+       # (load_test_data('./test_data/blacklist_files_failure.json'),)
+    ],
+
+)  # noqa: E124
+def test_blacklist_files_command(test_data, requests_mock):
+    from PaloAltoNetworks_XDR import blacklist_files_command, Client
+
+    blacklist_files_expected_tesult = test_data[0]['command_expected_result']
+    requests_mock.post(f'{XDR_URL}/public_api/v1/hash_exceptions/blacklist/', json=test_data[0]['api_response'])
+
+    client = Client(
+        base_url=f'{XDR_URL}/public_api/v1'
+    )
+    outputs = blacklist_files_command(client, test_data[0]['command_args'])
+
+    assert blacklist_files_expected_tesult == outputs
+
+
+def test_whitelist_files_command(test_data, requests_mock):
+    from PaloAltoNetworks_XDR import whitelist_files_command, Client
+
+    whitelist_files_expected_tesult = test_data[0]['command_expected_result']
+    requests_mock.post(f'{XDR_URL}/public_api/v1/hash_exceptions/whitelist/', json=test_data[0]['api_response'])
+
+    client = Client(
+        base_url=f'{XDR_URL}/public_api/v1'
+    )
+    outputs = whitelist_files_command(client, test_data[0]['command_args'])
+
+    assert whitelist_files_expected_tesult == outputs
+
+
+def test_quarantine_command(test_data, requests_mock):
+    from PaloAltoNetworks_XDR import quarantine_file_command, Client
+
+    quarantine_files_expected_tesult = test_data[0]['command_expected_result']
+    requests_mock.post(f'{XDR_URL}/public_api/v1/audits/endpoints/quarantine/', json=test_data[0]['api_response'])
+
+    client = Client(
+        base_url=f'{XDR_URL}/public_api/v1'
+    )
+    outputs = quarantine_file_command(client, test_data[0]['command_args'])
+
+    assert quarantine_files_expected_tesult == outputs
+
+
+def test_get_quarantine_status_command(test_data, requests_mock):
+    from PaloAltoNetworks_XDR import get_quarantine_status_command, Client
+
+    quarantine_files_expected_tesult = test_data[0]['command_expected_result']
+    requests_mock.post(f'{XDR_URL}/public_api/v1/audits/quarantine/status/', json=test_data[0]['api_response'])
+
+    client = Client(
+        base_url=f'{XDR_URL}/public_api/v1'
+    )
+    outputs = get_quarantine_status_command(client, test_data[0]['command_args'])
+
+    assert quarantine_files_expected_tesult == outputs
+
+
+def test_restore_file_command(test_data, requests_mock):
+    from PaloAltoNetworks_XDR import restore_file_command, Client
+
+    restore_expected_tesult = test_data[0]['command_expected_result']
+    requests_mock.post(f'{XDR_URL}/public_api/v1/endpoints/restore/', json=test_data[0]['api_response'])
+
+    client = Client(
+        base_url=f'{XDR_URL}/public_api/v1'
+    )
+    outputs = restore_file_command(client, test_data[0]['command_args'])
+
+    assert restore_expected_tesult == outputs
+
+
+def test_endpoint_scan_command(test_data, requests_mock):
+    from PaloAltoNetworks_XDR import scan_endpoint_command, Client
+
+    scan_expected_tesult = test_data[0]['command_expected_result']
+    requests_mock.post(f'{XDR_URL}/public_api/v1/endpoints/scan/', json=test_data[0]['api_response'])
+
+    client = Client(
+        base_url=f'{XDR_URL}/public_api/v1'
+    )
+    outputs = scan_endpoint_command(client, test_data[0]['command_args'])
+
+    assert scan_expected_tesult == outputs
