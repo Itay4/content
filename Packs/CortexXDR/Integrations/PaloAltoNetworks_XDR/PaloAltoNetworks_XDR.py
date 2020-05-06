@@ -637,7 +637,7 @@ class Client(BaseClient):
             url_suffix='/hash_exceptions/blacklist/',
             json_data={'request_data': request_data}
         )
-        return reply.get('reply').get('data', [])
+        return reply.get('reply')
 
     def whitelist_files(self, hash_list, comment=None):
         request_data: Dict[str, Any] = {}
@@ -1448,15 +1448,17 @@ def create_distribution_command(client, args):
     )
 
 
-def blacklist_files_commands(client, args):
+def blacklist_files_command(client, args):
     hash_list = args.get('hash_list')
     comment = args.get('comment')
 
     action_result = client.blacklist_files(hash_list=argToList(hash_list), comment=comment)
+    if not action_result:
+        raise ValueError('')
     return action_result
 
 
-def whitelist_files_commands(client, args):
+def whitelist_files_command(client, args):
     hash_list = args.get('hash_list')
     comment = args.get('comment')
 
@@ -1654,10 +1656,10 @@ def main():
             return_outputs(*get_audit_management_logs_command(client, demisto.args()))
 
         elif demisto.command() == 'xdr-blacklist-files':
-            return_outputs(*blacklist_files_commands(client, demisto.args()))
+            return_outputs(*blacklist_files_command(client, demisto.args()))
 
         elif demisto.command() == 'xdr-whitelist-files':
-            return_outputs(*whitelist_files_commands(client, demisto.args()))
+            return_outputs(*whitelist_files_command(client, demisto.args()))
 
         elif demisto.command() == 'xdr-quarantine-file':
             return_outputs(*quarantine_files_command(client, demisto.args()))
