@@ -798,6 +798,20 @@ class Client(BaseClient):
         )
         return reply.get('reply').get('data', [])
 
+    def get_quarantine_status(self, file_path, file_hash, endpoint_id):
+        request_data: Dict[str, Any] = {}
+        request_data['files'] = {
+            'endpoint_id': endpoint_id,
+            'file_path': file_path,
+            'file_hash': file_hash
+        }
+        reply = self._http_request(
+            method='POST',
+            url_suffix='audits/quarantine/status/',
+            json_data={'request_data': request_data}
+        )
+        return reply.get('reply').get('data', [])
+
 
 def get_incidents_command(client, args):
     """
@@ -1477,6 +1491,21 @@ def restore_file_command(client, args):
 
     return action_result
 
+
+def get_quarantine_status_command(client, args):
+    file_path = args.get('file_path')
+    file_hash = args.get('file_hash')
+    endpoint_id = args.get('endpoint_id')
+
+    action_result = client.get_quarantine_status(
+        file_path=file_path,
+        file_hash=file_hash,
+        endpoint_id=endpoint_id
+    )
+
+    return action_result
+
+
 def endpoint_scan_command(client, args):
     endpoint_id_list = args.get('endpoint_id_list')
     dist_name = args.get('dist_name')
@@ -1625,22 +1654,22 @@ def main():
             return_outputs(*get_audit_management_logs_command(client, demisto.args()))
 
         elif demisto.command() == 'xdr-blacklist-files':
-            return_outputs(*get_audit_agent_reports_command(client, demisto.args()))
+            return_outputs(*blacklist_files_commands(client, demisto.args()))
 
         elif demisto.command() == 'xdr-whitelist-files':
-            return_outputs(*get_audit_agent_reports_command(client, demisto.args()))
+            return_outputs(*whitelist_files_commands(client, demisto.args()))
 
         elif demisto.command() == 'xdr-quarantine-file':
-            return_outputs(*get_audit_agent_reports_command(client, demisto.args()))
+            return_outputs(*quarantine_files_command(client, demisto.args()))
 
         elif demisto.command() == 'xdr-get-quarantine-status':
-            return_outputs(*get_audit_agent_reports_command(client, demisto.args()))
+            return_outputs(*get_quarantine_status_command(client, demisto.args()))
 
         elif demisto.command() == 'xdr-restore-file':
-            return_outputs(*get_audit_agent_reports_command(client, demisto.args()))
+            return_outputs(*restore_file_command(client, demisto.args()))
 
         elif demisto.command() == 'xdr-endpoint-scan':
-            return_outputs(*get_audit_agent_reports_command(client, demisto.args()))
+            return_outputs(*endpoint_scan_command(client, demisto.args()))
 
     except Exception as err:
         if demisto.command() == 'fetch-incidents':
