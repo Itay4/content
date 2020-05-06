@@ -37,7 +37,7 @@ This integration was integrated and tested with Azure Compute API Version: 2017-
    <li><strong>Default Subscription ID</strong></li>
    <li><strong>Use system proxy</strong></li>
    <li><strong>Trust any certificate (not secure)</strong></li>
-   <li><strong>Use a self deployed Azure Application</strong></li>
+   <li><strong>Use a self-deployed Azure Application</strong></li>
     </ul>
   </li>
   <li>
