@@ -46,10 +46,9 @@ This integration was integrated and tested with Azure Compute API Version: 2017-
 </ol>
 
 <h2>Use a Self-Deployed Azure Application</h2>
-<p>To use a self-configured Azure application, a need to add a new Azure App Registration in the Azure Portal. To add the registration, refer to the following Microsoft article:
-<a href="https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app">https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app</a></p>
+<p>To use a self-configured Azure application, you need to add a new Azure App Registration in the Azure Portal. To add the registration, refer to the <a href="https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app">Microsoft documentation</a></p>
 <p>The Tenant ID, Client ID, and Client secret are required for the integration.
-To configure the integration in Demisto to use the application, place those parameters in the following manner (instead of how you received them from the admin consent in the current doc):
+When you configure the integration in Demisto enter those parameters in the appropriate fields (instead of how you received them from the admin consent in the current doc).
 <p>ID - Client ID<br>
 Token - Tenant ID<br>
 Key - Client Secret</p></p>

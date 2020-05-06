@@ -486,7 +486,7 @@ def get_vm_command(client: MsGraphClient, args: dict):
     response = client.get_vm(resource_group, vm_name)
 
     # Retrieve relevant properties to return to context
-    vm_name = vm_name.lower()
+    vm_name = vm_name.lower()  # type: ignore
     properties = response.get('properties')
     os_disk = properties.get('storageProfile', {}).get('osDisk')
     datadisk = os_disk.get('diskSizeGB', 'NA')
@@ -633,7 +633,7 @@ def start_vm_command(client: MsGraphClient, args: dict):
     client.validate_provisioning_state(resource_group, vm_name)
 
     client.start_vm(resource_group, vm_name)
-    vm_name = vm_name.lower()
+    vm_name = vm_name.lower()   # type: ignore
     vm = {
         'Name': vm_name,
         'ResourceGroup': args.get('resource_group'),
@@ -644,7 +644,7 @@ def start_vm_command(client: MsGraphClient, args: dict):
     human_readable = tableToMarkdown(title, vm, removeNull=True)
     entry_context = {'Azure.Compute(val.Name && val.Name === obj.Name)': vm}
 
-    return human_readable, entry_context , vm
+    return human_readable, entry_context, vm
 
 
 def poweroff_vm_command(client: MsGraphClient, args: dict):
@@ -668,7 +668,7 @@ def poweroff_vm_command(client: MsGraphClient, args: dict):
 
     client.poweroff_vm(resource_group, vm_name)
 
-    vm_name = vm_name.lower()
+    vm_name = vm_name.lower()   # type: ignore
     vm = {
         'Name': vm_name,
         'ResourceGroup': args.get('resource_group'),
