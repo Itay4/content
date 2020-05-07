@@ -1,21 +1,22 @@
 id: Detonate URL - ANYRUN - Test
 version: -1
 name: Detonate URL - ANYRUN - Test
-starttaskid: "0"
+starttaskid: '0'
 tasks:
-  "0":
-    id: "0"
+  '0':
+    id: '0'
     taskid: 248bd6ce-5cc0-4382-8989-cf6ac3feb46c
     type: start
     task:
       id: 248bd6ce-5cc0-4382-8989-cf6ac3feb46c
       version: -1
-      name: ""
+      name: ''
       iscommand: false
-      brand: ""
+      brand: ''
+      description: ''
     nexttasks:
       '#none#':
-      - "4"
+      - '4'
     separatecontext: false
     view: |-
       {
@@ -27,8 +28,8 @@ tasks:
     note: false
     timertriggers: []
     ignoreworker: false
-  "1":
-    id: "1"
+  '1':
+    id: '1'
     taskid: 0b881e68-330b-4f99-8f33-5fc9279317fb
     type: regular
     task:
@@ -39,10 +40,10 @@ tasks:
       scriptName: Set
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "2"
+      - '2'
     scriptarguments:
       append: {}
       key:
@@ -60,8 +61,8 @@ tasks:
     note: false
     timertriggers: []
     ignoreworker: false
-  "2":
-    id: "2"
+  '2':
+    id: '2'
     taskid: 8b84aacf-859e-40e6-8a32-aba6235fb93a
     type: playbook
     task:
@@ -71,10 +72,11 @@ tasks:
       playbookName: Detonate URL - ANYRUN
       type: playbook
       iscommand: false
-      brand: ""
+      brand: ''
+      description: ''
     nexttasks:
       '#none#':
-      - "3"
+      - '3'
     separatecontext: true
     view: |-
       {
@@ -86,8 +88,8 @@ tasks:
     note: false
     timertriggers: []
     ignoreworker: false
-  "3":
-    id: "3"
+  '3':
+    id: '3'
     taskid: cb75cebc-5bf4-4f2f-8d2e-4530cc730701
     type: title
     task:
@@ -96,7 +98,8 @@ tasks:
       name: Done
       type: title
       iscommand: false
-      brand: ""
+      brand: ''
+      description: ''
     separatecontext: false
     view: |-
       {
@@ -108,8 +111,8 @@ tasks:
     note: false
     timertriggers: []
     ignoreworker: false
-  "4":
-    id: "4"
+  '4':
+    id: '4'
     taskid: e110d4c9-2b47-4ec8-8f6e-3632b039742c
     type: regular
     task:
@@ -120,13 +123,13 @@ tasks:
       scriptName: DeleteContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "1"
+      - '1'
     scriptarguments:
       all:
-        simple: "yes"
+        simple: 'yes'
       index: {}
       key: {}
       keysToKeep: {}
@@ -156,3 +159,5 @@ view: |-
   }
 inputs: []
 outputs: []
+description: ''
+fromversion: 4.1.0

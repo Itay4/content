@@ -1,21 +1,22 @@
 id: d66e5f86-e045-403f-819e-5058aa603c32
 version: -1
 name: AWS - EC2 Test Playbook actions
-starttaskid: "0"
+starttaskid: '0'
 tasks:
-  "0":
-    id: "0"
+  '0':
+    id: '0'
     taskid: 365be7a9-574d-427c-8125-33f7bf932890
     type: start
     task:
       id: 365be7a9-574d-427c-8125-33f7bf932890
       version: -1
-      name: ""
+      name: ''
       iscommand: false
-      brand: ""
+      brand: ''
+      description: ''
     nexttasks:
       '#none#':
-      - "1"
+      - '1'
     separatecontext: false
     view: |-
       {
@@ -25,8 +26,8 @@ tasks:
         }
       }
     note: false
-  "1":
-    id: "1"
+  '1':
+    id: '1'
     taskid: 4aa07349-33b0-4ee9-851c-9e5fb15d8e70
     type: regular
     task:
@@ -40,9 +41,9 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "31"
-      - "30"
-      - "32"
+      - '31'
+      - '30'
+      - '32'
     scriptarguments:
       region: {}
       roleArn: {}
@@ -57,8 +58,8 @@ tasks:
         }
       }
     note: false
-  "2":
-    id: "2"
+  '2':
+    id: '2'
     taskid: 15f5580d-e1a9-439c-8550-4f1e5f19b330
     type: regular
     task:
@@ -73,7 +74,7 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "44"
+      - '44'
     scriptarguments:
       allocationId:
         simple: ${AWS.EC2.ElasticIPs.AllocationId}
@@ -95,8 +96,8 @@ tasks:
         }
       }
     note: false
-  "3":
-    id: "3"
+  '3':
+    id: '3'
     taskid: fca6d93b-45d1-488b-81a1-de3bab10b3c9
     type: regular
     task:
@@ -112,9 +113,9 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "46"
-      - "45"
-      - "47"
+      - '46'
+      - '45'
+      - '47'
     scriptarguments:
       description:
         simple: test
@@ -134,8 +135,8 @@ tasks:
         }
       }
     note: false
-  "4":
-    id: "4"
+  '4':
+    id: '4'
     taskid: e9482263-cd96-47cb-8489-ab9ad02306a2
     type: regular
     task:
@@ -149,7 +150,7 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "7"
+      - '7'
     scriptarguments:
       region: {}
       roleArn: {}
@@ -166,8 +167,8 @@ tasks:
         }
       }
     note: false
-  "5":
-    id: "5"
+  '5':
+    id: '5'
     taskid: 0abe0a82-afeb-4e9d-82d9-16df8b16fa30
     type: regular
     task:
@@ -182,8 +183,8 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "52"
-      - "51"
+      - '52'
+      - '51'
     scriptarguments:
       description:
         simple: test
@@ -192,7 +193,7 @@ tasks:
       name:
         simple: Test
       noReboot:
-        simple: "True"
+        simple: 'True'
       region: {}
       roleArn: {}
       roleSessionDuration: {}
@@ -206,8 +207,8 @@ tasks:
         }
       }
     note: false
-  "6":
-    id: "6"
+  '6':
+    id: '6'
     taskid: ef2ecab1-df53-4912-8b10-b0d5ce69fae6
     type: regular
     task:
@@ -221,7 +222,7 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "14"
+      - '14'
     scriptarguments:
       imageId:
         simple: ${AWS.EC2.Images.[1].ImageId}
@@ -238,8 +239,8 @@ tasks:
         }
       }
     note: false
-  "7":
-    id: "7"
+  '7':
+    id: '7'
     taskid: e6b1a266-9ee0-4220-8b46-3f76ec91afa2
     type: regular
     task:
@@ -254,9 +255,9 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "48"
-      - "49"
-      - "50"
+      - '48'
+      - '49'
+      - '50'
     scriptarguments:
       iops: {}
       region: {}
@@ -264,7 +265,7 @@ tasks:
       roleSessionDuration: {}
       roleSessionName: {}
       size:
-        simple: "60"
+        simple: '60'
       volumeId:
         simple: ${AWS.EC2.Instances.BlockDeviceMappings.Ebs.VolumeId}
       volumeType: {}
@@ -277,8 +278,8 @@ tasks:
         }
       }
     note: false
-  "8":
-    id: "8"
+  '8':
+    id: '8'
     taskid: 69414416-c3ce-4fa7-8243-381e9814e8b5
     type: regular
     task:
@@ -293,7 +294,7 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "2"
+      - '2'
     scriptarguments:
       region: {}
       resources:
@@ -312,8 +313,8 @@ tasks:
         }
       }
     note: false
-  "9":
-    id: "9"
+  '9':
+    id: '9'
     taskid: 1f24c3b0-8b3f-40f0-82e7-87df29133f63
     type: regular
     task:
@@ -328,7 +329,7 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "10"
+      - '10'
     scriptarguments:
       associationId:
         simple: ${AWS.EC2.ElasticIPs.AssociationId}
@@ -345,8 +346,8 @@ tasks:
         }
       }
     note: false
-  "10":
-    id: "10"
+  '10':
+    id: '10'
     taskid: 9b4d1372-5f9e-4a18-8f8a-f3dbbc02fb27
     type: regular
     task:
@@ -360,7 +361,7 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "12"
+      - '12'
     scriptarguments:
       allocationId:
         simple: ${AWS.EC2.ElasticIPs.AllocationId}
@@ -377,8 +378,8 @@ tasks:
         }
       }
     note: false
-  "11":
-    id: "11"
+  '11':
+    id: '11'
     taskid: cd812038-6402-496e-8f44-c2a30d18b65a
     type: regular
     task:
@@ -392,7 +393,7 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "19"
+      - '19'
     scriptarguments:
       instanceIds:
         simple: ${AWS.EC2.Instances.InstanceId}
@@ -409,8 +410,8 @@ tasks:
         }
       }
     note: false
-  "12":
-    id: "12"
+  '12':
+    id: '12'
     taskid: 4aa82372-623f-485b-8b17-268ba3eaa3dc
     type: regular
     task:
@@ -424,7 +425,7 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "21"
+      - '21'
     scriptarguments:
       instanceIds:
         simple: ${AWS.EC2.Instances.InstanceId}
@@ -441,8 +442,8 @@ tasks:
         }
       }
     note: false
-  "13":
-    id: "13"
+  '13':
+    id: '13'
     taskid: 8b7e1bb5-4dc7-44ac-873c-27f114859533
     type: regular
     task:
@@ -457,7 +458,7 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "22"
+      - '22'
     scriptarguments:
       instanceIds:
         simple: ${AWS.EC2.Instances.InstanceId}
@@ -474,8 +475,8 @@ tasks:
         }
       }
     note: false
-  "14":
-    id: "14"
+  '14':
+    id: '14'
     taskid: 3bb812e2-2a34-4ed7-8f1a-733140c727bd
     type: regular
     task:
@@ -490,9 +491,9 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "55"
-      - "53"
-      - "54"
+      - '55'
+      - '53'
+      - '54'
     scriptarguments:
       availabilityZone:
         simple: ${AWS.EC2.Instances.Placement.AvailabilityZone}
@@ -504,7 +505,7 @@ tasks:
       roleSessionDuration: {}
       roleSessionName: {}
       size:
-        simple: "20"
+        simple: '20'
       snapshotId: {}
       tags: {}
       volumeType:
@@ -518,8 +519,8 @@ tasks:
         }
       }
     note: false
-  "15":
-    id: "15"
+  '15':
+    id: '15'
     taskid: a2940b2b-7de9-4c3f-8979-95b6adc81069
     type: regular
     task:
@@ -534,9 +535,9 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "58"
-      - "56"
-      - "57"
+      - '58'
+      - '56'
+      - '57'
     scriptarguments:
       device:
         simple: /dev/xvdb
@@ -557,8 +558,8 @@ tasks:
         }
       }
     note: false
-  "16":
-    id: "16"
+  '16':
+    id: '16'
     taskid: 72d8e6c9-14c2-4f33-8e2a-85c088708930
     type: regular
     task:
@@ -572,9 +573,9 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "61"
-      - "60"
-      - "59"
+      - '61'
+      - '60'
+      - '59'
     scriptarguments:
       device: {}
       force: {}
@@ -594,8 +595,8 @@ tasks:
         }
       }
     note: false
-  "17":
-    id: "17"
+  '17':
+    id: '17'
     taskid: 97439a12-ceab-4840-8a71-4715b705fa1e
     type: regular
     task:
@@ -610,7 +611,7 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "63"
+      - '63'
     scriptarguments:
       region: {}
       roleArn: {}
@@ -627,8 +628,8 @@ tasks:
         }
       }
     note: false
-  "18":
-    id: "18"
+  '18':
+    id: '18'
     taskid: 0260c93e-a497-436b-8bfe-e06ef712d6bd
     type: regular
     task:
@@ -647,26 +648,26 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "41"
-      - "40"
-      - "39"
-      - "43"
-      - "42"
+      - '41'
+      - '40'
+      - '39'
+      - '43'
+      - '42'
     scriptarguments:
       count:
-        simple: "1"
+        simple: '1'
       deviceName:
         simple: /dev/xvda
       disableApiTermination: {}
       ebsDeleteOnTermination:
-        simple: "True"
+        simple: 'True'
       ebsEncrypted: {}
       ebsIops: {}
       ebsKmsKeyId: {}
       ebsOptimized: {}
       ebsSnapshotId: {}
       ebsVolumeSize:
-        simple: "50"
+        simple: '50'
       ebsVolumeType:
         simple: gp2
       iamInstanceProfileArn: {}
@@ -700,8 +701,8 @@ tasks:
         }
       }
     note: false
-  "19":
-    id: "19"
+  '19':
+    id: '19'
     taskid: a0d22c52-0f65-4730-826b-29aa05ce4eeb
     type: regular
     task:
@@ -716,7 +717,7 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "13"
+      - '13'
     scriptarguments:
       filter: {}
       instanceIds:
@@ -736,8 +737,8 @@ tasks:
         }
       }
     note: false
-  "20":
-    id: "20"
+  '20':
+    id: '20'
     taskid: 64f606bf-b770-44c1-8019-cebfa8f03397
     type: regular
     task:
@@ -752,7 +753,7 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "70"
+      - '70'
     scriptarguments:
       filter: {}
       instanceIds:
@@ -772,8 +773,8 @@ tasks:
         }
       }
     note: false
-  "21":
-    id: "21"
+  '21':
+    id: '21'
     taskid: 63febf06-96bd-4cb7-8435-2dba189f2f5d
     type: regular
     task:
@@ -788,7 +789,7 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "11"
+      - '11'
     scriptarguments:
       filter: {}
       instanceIds:
@@ -808,8 +809,8 @@ tasks:
         }
       }
     note: false
-  "22":
-    id: "22"
+  '22':
+    id: '22'
     taskid: a53f24dc-7981-4af9-89ba-1e95a95297be
     type: regular
     task:
@@ -824,7 +825,7 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "29"
+      - '29'
     scriptarguments:
       filter: {}
       instanceIds:
@@ -844,8 +845,8 @@ tasks:
         }
       }
     note: false
-  "23":
-    id: "23"
+  '23':
+    id: '23'
     taskid: 72261e80-f1d7-46ca-80f6-c150a0d29148
     type: regular
     task:
@@ -859,7 +860,7 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "66"
+      - '66'
     scriptarguments:
       executableUsers: {}
       filters: {}
@@ -881,8 +882,8 @@ tasks:
         }
       }
     note: false
-  "24":
-    id: "24"
+  '24':
+    id: '24'
     taskid: 3d68dea3-8e6e-49de-83b1-7962325062dd
     type: regular
     task:
@@ -896,7 +897,7 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "67"
+      - '67'
     scriptarguments:
       filters: {}
       ownerIds: {}
@@ -918,8 +919,8 @@ tasks:
         }
       }
     note: false
-  "25":
-    id: "25"
+  '25':
+    id: '25'
     taskid: 1be14a97-9bf5-4b67-8fd3-d60743a17f67
     type: regular
     task:
@@ -933,9 +934,9 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "34"
-      - "35"
-      - "33"
+      - '34'
+      - '35'
+      - '33'
     scriptarguments:
       executableUsers: {}
       filters:
@@ -955,8 +956,8 @@ tasks:
         }
       }
     note: false
-  "26":
-    id: "26"
+  '26':
+    id: '26'
     taskid: a812275d-aec3-41f3-8ecc-d79637a24f94
     type: regular
     task:
@@ -970,9 +971,9 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "37"
-      - "36"
-      - "38"
+      - '37'
+      - '36'
+      - '38'
     scriptarguments:
       description:
         simple: Demisto-PlaybookTest
@@ -993,8 +994,8 @@ tasks:
         }
       }
     note: false
-  "27":
-    id: "27"
+  '27':
+    id: '27'
     taskid: c2e32871-45ce-4677-800c-2342583b2c38
     type: regular
     task:
@@ -1023,8 +1024,8 @@ tasks:
         }
       }
     note: false
-  "28":
-    id: "28"
+  '28':
+    id: '28'
     taskid: 0ad15846-9c50-4d9f-86e8-f4f66b5a42c8
     type: regular
     task:
@@ -1038,12 +1039,12 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "69"
+      - '69'
     scriptarguments:
       cidrIp:
         simple: 0.0.0.0/0
       fromPort:
-        simple: "22"
+        simple: '22'
       groupId:
         simple: ${AWS.EC2.SecurityGroups.GroupId}
       ipProtocol:
@@ -1054,7 +1055,7 @@ tasks:
       roleSessionName: {}
       sourceSecurityGroupName: {}
       toPort:
-        simple: "22"
+        simple: '22'
     separatecontext: false
     view: |-
       {
@@ -1064,8 +1065,8 @@ tasks:
         }
       }
     note: false
-  "29":
-    id: "29"
+  '29':
+    id: '29'
     taskid: 692065ec-88f9-4160-852d-ebc94dfb93f9
     type: regular
     task:
@@ -1081,12 +1082,12 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "27"
+      - '27'
     scriptarguments:
       cidrIp:
         simple: 0.0.0.0/0
       fromPort:
-        simple: "22"
+        simple: '22'
       groupId:
         simple: ${AWS.EC2.SecurityGroups.GroupId}
       ipProtocol:
@@ -1097,7 +1098,7 @@ tasks:
       roleSessionName: {}
       sourceSecurityGroupName: {}
       toPort:
-        simple: "22"
+        simple: '22'
     separatecontext: false
     view: |-
       {
@@ -1107,8 +1108,8 @@ tasks:
         }
       }
     note: false
-  "30":
-    id: "30"
+  '30':
+    id: '30'
     taskid: e9450631-5f3d-4dc8-87ad-c924b370ea5b
     type: regular
     task:
@@ -1124,10 +1125,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "25"
+      - '25'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1142,8 +1143,8 @@ tasks:
         }
       }
     note: false
-  "31":
-    id: "31"
+  '31':
+    id: '31'
     taskid: 30669d1a-294b-47b1-8b99-6ea76e5a3cc5
     type: regular
     task:
@@ -1159,10 +1160,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "25"
+      - '25'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1177,8 +1178,8 @@ tasks:
         }
       }
     note: false
-  "32":
-    id: "32"
+  '32':
+    id: '32'
     taskid: c00b6c3b-35b4-486f-8c27-dfde0c92f65f
     type: regular
     task:
@@ -1194,10 +1195,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "25"
+      - '25'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1212,8 +1213,8 @@ tasks:
         }
       }
     note: false
-  "33":
-    id: "33"
+  '33':
+    id: '33'
     taskid: e316159b-21c6-448c-8a22-e0ee34d037b9
     type: regular
     task:
@@ -1229,10 +1230,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "26"
+      - '26'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1247,8 +1248,8 @@ tasks:
         }
       }
     note: false
-  "34":
-    id: "34"
+  '34':
+    id: '34'
     taskid: 2d059368-16ff-4c9d-863d-2dae9c2ae662
     type: regular
     task:
@@ -1264,10 +1265,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "26"
+      - '26'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1282,8 +1283,8 @@ tasks:
         }
       }
     note: false
-  "35":
-    id: "35"
+  '35':
+    id: '35'
     taskid: ec427bd8-ca7f-4813-841b-1c1d6571e4b7
     type: regular
     task:
@@ -1299,10 +1300,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "26"
+      - '26'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1317,8 +1318,8 @@ tasks:
         }
       }
     note: false
-  "36":
-    id: "36"
+  '36':
+    id: '36'
     taskid: c4b1f30e-11d9-4a9f-8055-a5e996db441c
     type: regular
     task:
@@ -1334,10 +1335,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "28"
+      - '28'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1352,8 +1353,8 @@ tasks:
         }
       }
     note: false
-  "37":
-    id: "37"
+  '37':
+    id: '37'
     taskid: db4ee8a3-01c1-4842-8d44-2d967e6e8ddd
     type: regular
     task:
@@ -1369,10 +1370,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "28"
+      - '28'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1387,8 +1388,8 @@ tasks:
         }
       }
     note: false
-  "38":
-    id: "38"
+  '38':
+    id: '38'
     taskid: bab6b383-dd1d-4524-89db-473eedbb47b1
     type: regular
     task:
@@ -1404,10 +1405,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "28"
+      - '28'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1422,8 +1423,8 @@ tasks:
         }
       }
     note: false
-  "39":
-    id: "39"
+  '39':
+    id: '39'
     taskid: b198c853-5559-46ff-87ce-7cc57a63b99f
     type: regular
     task:
@@ -1439,10 +1440,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "20"
+      - '20'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1457,8 +1458,8 @@ tasks:
         }
       }
     note: false
-  "40":
-    id: "40"
+  '40':
+    id: '40'
     taskid: 9a56cbdc-a759-439d-8fe7-27033e30a3c0
     type: regular
     task:
@@ -1474,10 +1475,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "20"
+      - '20'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1492,8 +1493,8 @@ tasks:
         }
       }
     note: false
-  "41":
-    id: "41"
+  '41':
+    id: '41'
     taskid: f17efbd4-8dde-42bf-8a2e-4ded2d456140
     type: regular
     task:
@@ -1509,10 +1510,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "20"
+      - '20'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1527,8 +1528,8 @@ tasks:
         }
       }
     note: false
-  "42":
-    id: "42"
+  '42':
+    id: '42'
     taskid: d58ae543-a310-430b-8978-055151d0d863
     type: regular
     task:
@@ -1544,10 +1545,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "20"
+      - '20'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1562,8 +1563,8 @@ tasks:
         }
       }
     note: false
-  "43":
-    id: "43"
+  '43':
+    id: '43'
     taskid: b4404c3f-98b2-4643-868a-1c8104b08d16
     type: regular
     task:
@@ -1579,10 +1580,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "20"
+      - '20'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1597,8 +1598,8 @@ tasks:
         }
       }
     note: false
-  "44":
-    id: "44"
+  '44':
+    id: '44'
     taskid: 6e4303be-a69f-430a-8777-9de8ce95a4fc
     type: regular
     task:
@@ -1614,10 +1615,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "68"
+      - '68'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1632,8 +1633,8 @@ tasks:
         }
       }
     note: false
-  "45":
-    id: "45"
+  '45':
+    id: '45'
     taskid: b30bea42-3071-44af-8949-eb58bcff48ff
     type: regular
     task:
@@ -1649,10 +1650,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "24"
+      - '24'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1667,8 +1668,8 @@ tasks:
         }
       }
     note: false
-  "46":
-    id: "46"
+  '46':
+    id: '46'
     taskid: 7b279655-bf6e-497d-8a94-bae5357c9cf7
     type: regular
     task:
@@ -1684,10 +1685,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "24"
+      - '24'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1702,8 +1703,8 @@ tasks:
         }
       }
     note: false
-  "47":
-    id: "47"
+  '47':
+    id: '47'
     taskid: 2503e053-c276-4334-873c-0f7cc7a21634
     type: regular
     task:
@@ -1719,10 +1720,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "24"
+      - '24'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1737,8 +1738,8 @@ tasks:
         }
       }
     note: false
-  "48":
-    id: "48"
+  '48':
+    id: '48'
     taskid: 95ab4445-6f47-4e43-8ab1-f3363d9d6d1f
     type: regular
     task:
@@ -1754,10 +1755,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "5"
+      - '5'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1772,8 +1773,8 @@ tasks:
         }
       }
     note: false
-  "49":
-    id: "49"
+  '49':
+    id: '49'
     taskid: ee49871f-fdb4-4ed2-886c-661d50870103
     type: regular
     task:
@@ -1789,10 +1790,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "5"
+      - '5'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1807,8 +1808,8 @@ tasks:
         }
       }
     note: false
-  "50":
-    id: "50"
+  '50':
+    id: '50'
     taskid: b4491887-ab68-4240-8746-71cd62c48c62
     type: regular
     task:
@@ -1824,10 +1825,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "5"
+      - '5'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1842,8 +1843,8 @@ tasks:
         }
       }
     note: false
-  "51":
-    id: "51"
+  '51':
+    id: '51'
     taskid: c3bfe8c7-8a9b-4219-8900-57e57f8ef2d8
     type: regular
     task:
@@ -1859,10 +1860,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "23"
+      - '23'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1877,8 +1878,8 @@ tasks:
         }
       }
     note: false
-  "52":
-    id: "52"
+  '52':
+    id: '52'
     taskid: 4c1afaab-7582-42f8-8bd7-000b7476bb17
     type: regular
     task:
@@ -1894,10 +1895,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "23"
+      - '23'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1912,8 +1913,8 @@ tasks:
         }
       }
     note: false
-  "53":
-    id: "53"
+  '53':
+    id: '53'
     taskid: 06458db2-6ec1-4c06-8cdf-033e90885ffb
     type: regular
     task:
@@ -1929,10 +1930,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "15"
+      - '15'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1947,8 +1948,8 @@ tasks:
         }
       }
     note: false
-  "54":
-    id: "54"
+  '54':
+    id: '54'
     taskid: 560a025e-1b13-4f9c-8d6b-78c5eba6ec85
     type: regular
     task:
@@ -1964,10 +1965,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "15"
+      - '15'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -1982,8 +1983,8 @@ tasks:
         }
       }
     note: false
-  "55":
-    id: "55"
+  '55':
+    id: '55'
     taskid: 5acde28c-b1cc-4bc7-8a8b-47bda9c56e30
     type: regular
     task:
@@ -1999,10 +2000,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "15"
+      - '15'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -2017,8 +2018,8 @@ tasks:
         }
       }
     note: false
-  "56":
-    id: "56"
+  '56':
+    id: '56'
     taskid: 38b9a152-8dd9-4a30-85eb-7433147f63b5
     type: regular
     task:
@@ -2034,10 +2035,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "16"
+      - '16'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -2052,8 +2053,8 @@ tasks:
         }
       }
     note: false
-  "57":
-    id: "57"
+  '57':
+    id: '57'
     taskid: cdb0ee85-30ed-4e29-89b0-7cd347837713
     type: regular
     task:
@@ -2069,10 +2070,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "16"
+      - '16'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -2087,8 +2088,8 @@ tasks:
         }
       }
     note: false
-  "58":
-    id: "58"
+  '58':
+    id: '58'
     taskid: 1b8c5995-fc14-479d-82d4-535d33251a6e
     type: regular
     task:
@@ -2104,10 +2105,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "16"
+      - '16'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -2122,8 +2123,8 @@ tasks:
         }
       }
     note: false
-  "59":
-    id: "59"
+  '59':
+    id: '59'
     taskid: 98d721ad-4800-4a7d-8f0f-3e55a45fc396
     type: regular
     task:
@@ -2139,10 +2140,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "17"
+      - '17'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -2157,8 +2158,8 @@ tasks:
         }
       }
     note: false
-  "60":
-    id: "60"
+  '60':
+    id: '60'
     taskid: 84074114-c438-40ad-8e3e-1cd41161584d
     type: regular
     task:
@@ -2174,10 +2175,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "17"
+      - '17'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -2192,8 +2193,8 @@ tasks:
         }
       }
     note: false
-  "61":
-    id: "61"
+  '61':
+    id: '61'
     taskid: ba0ca8e6-d5fc-46b2-8849-37fdab3cc88d
     type: regular
     task:
@@ -2209,10 +2210,10 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "17"
+      - '17'
     scriptarguments:
       expectedValue: {}
       fields: {}
@@ -2227,8 +2228,8 @@ tasks:
         }
       }
     note: false
-  "62":
-    id: "62"
+  '62':
+    id: '62'
     taskid: 81cca167-9479-4abb-8d66-47e370d93e81
     type: regular
     task:
@@ -2242,7 +2243,7 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "8"
+      - '8'
     scriptarguments:
       filters: {}
       instanceIds:
@@ -2260,8 +2261,8 @@ tasks:
         }
       }
     note: false
-  "63":
-    id: "63"
+  '63':
+    id: '63'
     taskid: cd9f9a22-9431-418d-8f27-309b6ea25e65
     type: regular
     task:
@@ -2279,7 +2280,7 @@ tasks:
       brand: AWS - EC2_copy
     nexttasks:
       '#none#':
-      - "9"
+      - '9'
     scriptarguments:
       instanceIds: {}
     separatecontext: false
@@ -2291,8 +2292,8 @@ tasks:
         }
       }
     note: false
-  "64":
-    id: "64"
+  '64':
+    id: '64'
     taskid: 99e87193-f9fd-4766-8552-77919f5742a8
     type: regular
     task:
@@ -2306,7 +2307,7 @@ tasks:
       brand: AWS - EC2_copy
     nexttasks:
       '#none#':
-      - "62"
+      - '62'
     scriptarguments:
       instancesIds:
         simple: ${AWS.EC2.Instances.InstanceId}
@@ -2319,8 +2320,8 @@ tasks:
         }
       }
     note: false
-  "65":
-    id: "65"
+  '65':
+    id: '65'
     taskid: 5845d4a8-632f-4c83-8e35-437f047bcbab
     type: regular
     task:
@@ -2334,7 +2335,7 @@ tasks:
       brand: AWS - EC2_copy
     nexttasks:
       '#none#':
-      - "64"
+      - '64'
     scriptarguments:
       instancesIds:
         simple: ${AWS.EC2.Instances.InstanceId}
@@ -2347,8 +2348,8 @@ tasks:
         }
       }
     note: false
-  "66":
-    id: "66"
+  '66':
+    id: '66'
     taskid: 54c89ed3-9696-49bb-8285-7cf09d0d19bb
     type: regular
     task:
@@ -2363,7 +2364,7 @@ tasks:
       brand: AWS - EC2_copy
     nexttasks:
       '#none#':
-      - "6"
+      - '6'
     scriptarguments:
       clientToken: {}
       description: {}
@@ -2384,8 +2385,8 @@ tasks:
         }
       }
     note: false
-  "67":
-    id: "67"
+  '67':
+    id: '67'
     taskid: ccb58b2a-52f1-48a8-8aaa-6b591a5bad47
     type: regular
     task:
@@ -2401,7 +2402,7 @@ tasks:
       brand: AWS - EC2_copy
     nexttasks:
       '#none#':
-      - "4"
+      - '4'
     scriptarguments:
       description: {}
       encrypted: {}
@@ -2419,8 +2420,8 @@ tasks:
         }
       }
     note: false
-  "68":
-    id: "68"
+  '68':
+    id: '68'
     taskid: 57ac74a5-4136-48f0-8b0b-2db68beacceb
     type: regular
     task:
@@ -2430,10 +2431,11 @@ tasks:
       scriptName: DeleteContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
+      description: ''
     nexttasks:
       '#none#':
-      - "3"
+      - '3'
     scriptarguments:
       all: {}
       key:
@@ -2447,8 +2449,8 @@ tasks:
         }
       }
     note: false
-  "69":
-    id: "69"
+  '69':
+    id: '69'
     taskid: 11405132-3995-4531-85f7-8d266a96195c
     type: regular
     task:
@@ -2462,7 +2464,7 @@ tasks:
       brand: AWS - EC2
     nexttasks:
       '#none#':
-      - "18"
+      - '18'
     scriptarguments:
       description:
         simple: Demisto-PlaybookTest2
@@ -2483,8 +2485,8 @@ tasks:
         }
       }
     note: false
-  "70":
-    id: "70"
+  '70':
+    id: '70'
     taskid: a21775a9-b8d2-4e48-866c-f3b811c83d8a
     type: regular
     task:
@@ -2504,7 +2506,7 @@ tasks:
       brand: AWS - EC2_copy
     nexttasks:
       '#none#':
-      - "71"
+      - '71'
     scriptarguments:
       disableApiTermination: {}
       ebsOptimized: {}
@@ -2524,8 +2526,8 @@ tasks:
         }
       }
     note: false
-  "71":
-    id: "71"
+  '71':
+    id: '71'
     taskid: 33f2ce33-747f-421b-8f22-224c5732f9d2
     type: regular
     task:
@@ -2540,7 +2542,7 @@ tasks:
       brand: AWS - EC2_copy
     nexttasks:
       '#none#':
-      - "65"
+      - '65'
     scriptarguments:
       attachmentId: {}
       deleteOnTermination: {}
@@ -2572,3 +2574,5 @@ view: |-
   }
 inputs: []
 outputs: []
+fromversion: 4.1.0
+description: ''

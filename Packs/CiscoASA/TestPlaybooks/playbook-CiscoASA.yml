@@ -134,11 +134,11 @@ tasks:
       brand: ''
       description: ''
     nexttasks:
-      yes:
+      'yes':
       - '5'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isEqualString
           left:
@@ -213,11 +213,11 @@ tasks:
       brand: ''
       description: ''
     nexttasks:
-      yes:
+      'yes':
       - '7'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isEqualString
           left:
@@ -332,11 +332,11 @@ tasks:
     nexttasks:
       '#default#':
       - '11'
-      yes:
+      'yes':
       - '10'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isEqualString
           left:

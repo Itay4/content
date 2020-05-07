@@ -1,21 +1,23 @@
 id: Active Directory Query V2 configuration with port
 version: -1
 name: Active Directory Query V2 configuration with port
-starttaskid: "0"
+starttaskid: '0'
+description: ''
 tasks:
-  "0":
-    id: "0"
+  '0':
+    id: '0'
     taskid: 97ad5ed7-060f-41c6-88e2-fc7d69177bc8
     type: start
     task:
       id: 97ad5ed7-060f-41c6-88e2-fc7d69177bc8
       version: -1
-      name: ""
+      name: ''
       iscommand: false
-      brand: ""
+      brand: ''
+      description: ''
     nexttasks:
       '#none#':
-      - "1"
+      - '1'
     separatecontext: false
     view: |-
       {
@@ -27,8 +29,8 @@ tasks:
     note: false
     timertriggers: []
     ignoreworker: false
-  "1":
-    id: "1"
+  '1':
+    id: '1'
     taskid: c0c1ffaf-0c25-4a8f-8035-ff68b1c44518
     type: title
     task:
@@ -37,10 +39,11 @@ tasks:
       name: Instance configuration success!
       type: title
       iscommand: false
-      brand: ""
+      brand: ''
+      description: ''
     nexttasks:
       '#none#':
-      - "2"
+      - '2'
     separatecontext: false
     view: |-
       {
@@ -52,8 +55,8 @@ tasks:
     note: false
     timertriggers: []
     ignoreworker: false
-  "2":
-    id: "2"
+  '2':
+    id: '2'
     taskid: 661f7226-6769-4774-835a-e33f5fa7b156
     type: regular
     task:
@@ -64,7 +67,7 @@ tasks:
       script: '|||ad-get-user'
       type: regular
       iscommand: true
-      brand: ""
+      brand: ''
     scriptarguments:
       attributes: {}
       custom-field-data: {}
@@ -72,7 +75,7 @@ tasks:
       dn: {}
       email: {}
       limit:
-        simple: "10"
+        simple: '10'
       name:
         simple: '*'
       user-account-control-out: {}
@@ -102,3 +105,4 @@ view: |-
   }
 inputs: []
 outputs: []
+fromversion: 4.1.0

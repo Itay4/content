@@ -1,21 +1,22 @@
 id: ANYRUN-Test
 version: -1
 name: ANYRUN-Test
-starttaskid: "0"
+starttaskid: '0'
 tasks:
-  "0":
-    id: "0"
+  '0':
+    id: '0'
     taskid: 2eae9c58-286f-47ed-8e58-bea80fe53944
     type: start
     task:
       id: 2eae9c58-286f-47ed-8e58-bea80fe53944
       version: -1
-      name: ""
+      name: ''
       iscommand: false
-      brand: ""
+      brand: ''
+      description: ''
     nexttasks:
       '#none#':
-      - "1"
+      - '1'
     separatecontext: false
     view: |-
       {
@@ -27,8 +28,8 @@ tasks:
     note: false
     timertriggers: []
     ignoreworker: false
-  "1":
-    id: "1"
+  '1':
+    id: '1'
     taskid: 4d86d5f2-e0b2-4783-8b4e-cda748a48485
     type: regular
     task:
@@ -39,13 +40,13 @@ tasks:
       scriptName: DeleteContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "2"
+      - '2'
     scriptarguments:
       all:
-        simple: "yes"
+        simple: 'yes'
       index: {}
       key: {}
       keysToKeep: {}
@@ -61,8 +62,8 @@ tasks:
     note: false
     timertriggers: []
     ignoreworker: false
-  "2":
-    id: "2"
+  '2':
+    id: '2'
     taskid: 930b9610-9e0a-4c02-8826-ba317f830ce3
     type: regular
     task:
@@ -76,7 +77,7 @@ tasks:
       brand: ANYRUN
     nexttasks:
       '#none#':
-      - "3"
+      - '3'
     scriptarguments:
       filter: {}
       limit: {}
@@ -93,8 +94,8 @@ tasks:
     note: false
     timertriggers: []
     ignoreworker: false
-  "3":
-    id: "3"
+  '3':
+    id: '3'
     taskid: 4d0f9194-5c86-4e9b-8964-fa1d61901f1b
     type: condition
     task:
@@ -103,13 +104,14 @@ tasks:
       name: Check that output field is not empty
       type: condition
       iscommand: false
-      brand: ""
+      brand: ''
+      description: ''
     nexttasks:
-      "yes":
-      - "4"
+      'yes':
+      - '4'
     separatecontext: false
     conditions:
-    - label: "yes"
+    - label: 'yes'
       condition:
       - - operator: isNotEmpty
           left:
@@ -128,8 +130,8 @@ tasks:
     note: false
     timertriggers: []
     ignoreworker: false
-  "4":
-    id: "4"
+  '4':
+    id: '4'
     taskid: 37d2963a-f81a-471a-82e5-c4eff0223228
     type: title
     task:
@@ -138,7 +140,8 @@ tasks:
       name: Done
       type: title
       iscommand: false
-      brand: ""
+      brand: ''
+      description: ''
     separatecontext: false
     view: |-
       {
@@ -164,3 +167,5 @@ view: |-
   }
 inputs: []
 outputs: []
+fromversion: 4.1.0
+description: ''

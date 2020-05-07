@@ -1,38 +1,33 @@
-id: Akamai_WAF_SIEM-Test
+id: Akamai-WAF-SIEM_Test
 version: -1
 contentitemfields:
   propagationLabels: []
 name: Akamai-WAF-SIEM_Test
-starttaskid: "0"
+starttaskid: '0'
 tasks:
-  "0":
-    id: "0"
+  '0':
+    id: '0'
     taskid: 068d2e11-d07a-4ce8-831a-fb3f447cf178
     type: start
     task:
       id: 068d2e11-d07a-4ce8-831a-fb3f447cf178
       version: -1
-      name: ""
+      name: ''
       iscommand: false
-      brand: ""
+      brand: ''
+      description: ''
     nexttasks:
       '#none#':
-      - "1"
+      - '1'
     separatecontext: false
-    view: |-
-      {
-        "position": {
-          "x": 50,
-          "y": 50
-        }
-      }
+    view: "{\n  \"position\": {\n    \"x\": 50,\n    \"y\": 50\n  }\n}"
     note: false
     timertriggers: []
     ignoreworker: false
     skipunavailable: false
     quiet: false
-  "1":
-    id: "1"
+  '1':
+    id: '1'
     taskid: b73ef49f-afb5-458c-8de4-aa0cefb724fa
     type: regular
     task:
@@ -43,32 +38,26 @@ tasks:
       scriptName: DeleteContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "2"
+      - '2'
     scriptarguments:
       all:
-        simple: "yes"
+        simple: 'yes'
       index: {}
       key: {}
       keysToKeep: {}
       subplaybook: {}
     separatecontext: false
-    view: |-
-      {
-        "position": {
-          "x": 50,
-          "y": 195
-        }
-      }
+    view: "{\n  \"position\": {\n    \"x\": 50,\n    \"y\": 195\n  }\n}"
     note: false
     timertriggers: []
     ignoreworker: false
     skipunavailable: false
     quiet: false
-  "2":
-    id: "2"
+  '2':
+    id: '2'
     taskid: 2fc912e5-21a8-45c6-881d-4b089b2476b3
     type: regular
     task:
@@ -79,35 +68,29 @@ tasks:
       script: '|||akamai-siem-get-events'
       type: regular
       iscommand: true
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "4"
+      - '4'
     scriptarguments:
       config_ids:
-        simple: "50170"
+        simple: '50170'
       from_epoch:
-        simple: "1576602011"
+        simple: '1576602011'
       limit:
-        simple: "1"
+        simple: '1'
       offset: {}
       period: {}
       to_epoch: {}
     separatecontext: false
-    view: |-
-      {
-        "position": {
-          "x": 50,
-          "y": 370
-        }
-      }
+    view: "{\n  \"position\": {\n    \"x\": 50,\n    \"y\": 370\n  }\n}"
     note: false
     timertriggers: []
     ignoreworker: false
     skipunavailable: false
     quiet: false
-  "4":
-    id: "4"
+  '4':
+    id: '4'
     taskid: cf1614be-f954-46b1-818f-9849edafaf02
     type: regular
     task:
@@ -118,7 +101,7 @@ tasks:
       scriptName: FetchFromInstance
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     scriptarguments:
       add_to_context: {}
       brand_name:
@@ -127,29 +110,16 @@ tasks:
       expect_data: {}
       instance_name: {}
     separatecontext: false
-    view: |-
-      {
-        "position": {
-          "x": 50,
-          "y": 545
-        }
-      }
+    view: "{\n  \"position\": {\n    \"x\": 50,\n    \"y\": 545\n  }\n}"
     note: false
     timertriggers: []
     ignoreworker: false
     skipunavailable: false
     quiet: false
-view: |-
-  {
-    "linkLabelsPosition": {},
-    "paper": {
-      "dimensions": {
-        "height": 590,
-        "width": 380,
-        "x": 50,
-        "y": 50
-      }
-    }
-  }
+view: "{\n  \"linkLabelsPosition\": {},\n  \"paper\": {\n    \"dimensions\": {\n \
+  \     \"height\": 590,\n      \"width\": 380,\n      \"x\": 50,\n      \"y\": 50\n\
+  \    }\n  }\n}"
 inputs: []
 outputs: []
+fromversion: 5.0.0
+description: ''

@@ -3,21 +3,22 @@ version: -1
 fromversion: 4.5.0
 name: Active Directory - Get User Manager Details - Test
 description: A test playbook for the Active Directory - Get User Manager Email playbook.
-starttaskid: "0"
+starttaskid: '0'
 tasks:
-  "0":
-    id: "0"
+  '0':
+    id: '0'
     taskid: 15674a50-7154-4c1d-8f76-4a78b8069709
     type: start
     task:
       id: 15674a50-7154-4c1d-8f76-4a78b8069709
       version: -1
-      name: ""
+      name: ''
       iscommand: false
-      brand: ""
+      brand: ''
+      description: ''
     nexttasks:
       '#none#':
-      - "5"
+      - '5'
     separatecontext: false
     view: |-
       {
@@ -29,23 +30,23 @@ tasks:
     note: false
     timertriggers: []
     ignoreworker: false
-  "1":
-    id: "1"
+  '1':
+    id: '1'
     taskid: 8ecfaffd-55cd-45e2-8667-f5cf68a029cf
     type: playbook
     task:
       id: 8ecfaffd-55cd-45e2-8667-f5cf68a029cf
       version: -1
-      name: Active Directory - Get User Manager Email
+      name: Active Directory - Get User Manager Details
       description: Takes an email address or a username of a user account in Active
         Directory, and returns the email address of his or her manager.
       playbookName: Active Directory - Get User Manager Details
       type: playbook
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "2"
+      - '2'
     scriptarguments:
       UserEmail:
         simple: remove_me@demistodev.com
@@ -53,7 +54,7 @@ tasks:
     separatecontext: true
     loop:
       iscommand: false
-      exitCondition: ""
+      exitCondition: ''
       wait: 1
     view: |-
       {
@@ -65,8 +66,8 @@ tasks:
     note: false
     timertriggers: []
     ignoreworker: false
-  "2":
-    id: "2"
+  '2':
+    id: '2'
     taskid: 0c8fdc71-228e-4ac1-8f93-be9455216705
     type: condition
     task:
@@ -75,15 +76,16 @@ tasks:
       name: Was the user manager found?
       type: condition
       iscommand: false
-      brand: ""
+      brand: ''
+      description: ''
     nexttasks:
       '#default#':
-      - "4"
-      "yes":
-      - "3"
+      - '4'
+      'yes':
+      - '3'
     separatecontext: false
     conditions:
-    - label: "yes"
+    - label: 'yes'
       condition:
       - - operator: isEqualString
           left:
@@ -105,8 +107,8 @@ tasks:
     note: false
     timertriggers: []
     ignoreworker: false
-  "3":
-    id: "3"
+  '3':
+    id: '3'
     taskid: 47ed2c34-3501-415b-898a-b5a914ac1a69
     type: title
     task:
@@ -115,7 +117,8 @@ tasks:
       name: Done
       type: title
       iscommand: false
-      brand: ""
+      brand: ''
+      description: ''
     separatecontext: false
     view: |-
       {
@@ -127,8 +130,8 @@ tasks:
     note: false
     timertriggers: []
     ignoreworker: false
-  "4":
-    id: "4"
+  '4':
+    id: '4'
     taskid: 599d04ab-61de-4715-83d3-405c0e9c6310
     type: regular
     task:
@@ -139,15 +142,15 @@ tasks:
       scriptName: PrintErrorEntry
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "3"
+      - '3'
     scriptarguments:
       message:
         simple: The manager was not found. Check the demisto.local Active Directory
-          instance. There should be a Remove Me user, and Donald Trump should
-          be his manager. Trump should also have a specific email address configured.
+          instance. There should be a Remove Me user, and Donald Trump should be his
+          manager. Trump should also have a specific email address configured.
     reputationcalc: 1
     separatecontext: false
     view: |-
@@ -160,8 +163,8 @@ tasks:
     note: false
     timertriggers: []
     ignoreworker: false
-  "5":
-    id: "5"
+  '5':
+    id: '5'
     taskid: 6a3f59b1-16d5-478e-856b-3deada96e2dc
     type: regular
     task:
@@ -172,13 +175,13 @@ tasks:
       scriptName: DeleteContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "1"
+      - '1'
     scriptarguments:
       all:
-        simple: "yes"
+        simple: 'yes'
       index: {}
       key: {}
       keysToKeep: {}

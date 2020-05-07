@@ -1,21 +1,23 @@
 id: ActiveMQ Test
 version: -1
 name: ActiveMQ Test
-starttaskid: "0"
+starttaskid: '0'
+description: ''
 tasks:
-  "0":
-    id: "0"
+  '0':
+    id: '0'
     taskid: 022babb9-505b-4b0d-84c2-96d856226c66
     type: start
     task:
       id: 022babb9-505b-4b0d-84c2-96d856226c66
       version: -1
-      name: ""
+      name: ''
       iscommand: false
-      brand: ""
+      brand: ''
+      description: ''
     nexttasks:
       '#none#':
-      - "5"
+      - '5'
     separatecontext: false
     view: |-
       {
@@ -39,7 +41,7 @@ tasks:
       brand: ActiveMQ
     nexttasks:
       '#none#':
-      - "4"
+      - '4'
     scriptarguments:
       body:
         simple: Demisto$$
@@ -68,12 +70,12 @@ tasks:
       brand: ActiveMQ
     nexttasks:
       '#none#':
-      - "3"
+      - '3'
     scriptarguments:
       extend-context:
         simple: msg=
       subscription-id:
-        simple: "5"
+        simple: '5'
       topic-name:
         simple: demisto-test
     separatecontext: false
@@ -95,7 +97,8 @@ tasks:
       scriptName: VerifyContext
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
+      description: ''
     scriptarguments:
       expectedValue:
         simple: Demisto$$
@@ -122,13 +125,13 @@ tasks:
       scriptName: Sleep
       type: regular
       iscommand: false
-      brand: ""
+      brand: ''
     nexttasks:
       '#none#':
-      - "2"
+      - '2'
     scriptarguments:
       seconds:
-        simple: "3"
+        simple: '3'
     separatecontext: false
     view: |-
       {
@@ -152,12 +155,12 @@ tasks:
       brand: ActiveMQ
     nexttasks:
       '#none#':
-      - "1"
+      - '1'
     scriptarguments:
       extend-context:
         simple: msg=
       subscription-id:
-        simple: "5"
+        simple: '5'
       topic-name:
         simple: demisto-test
     separatecontext: false
@@ -182,3 +185,4 @@ view: |-
   }
 inputs: []
 outputs: []
+fromversion: 4.1.0

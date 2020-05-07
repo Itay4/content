@@ -101,11 +101,11 @@ tasks:
     nexttasks:
       '#default#':
       - '11'
-      yes:
+      'yes':
       - '4'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isEqualString
           left:
@@ -198,11 +198,11 @@ tasks:
     nexttasks:
       '#default#':
       - '15'
-      yes:
+      'yes':
       - '7'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isEqualString
           left:
@@ -295,11 +295,11 @@ tasks:
     nexttasks:
       '#default#':
       - '19'
-      yes:
+      'yes':
       - '10'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isEqualString
           left:
@@ -416,11 +416,11 @@ tasks:
       brand: ''
       description: ''
     nexttasks:
-      yes:
+      'yes':
       - '4'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isEqualString
           left:
@@ -567,11 +567,11 @@ tasks:
       brand: ''
       description: ''
     nexttasks:
-      yes:
+      'yes':
       - '7'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isEqualString
           left:
@@ -688,11 +688,11 @@ tasks:
       brand: ''
       description: ''
     nexttasks:
-      yes:
+      'yes':
       - '10'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isEqualString
           left:
@@ -755,11 +755,11 @@ tasks:
     nexttasks:
       '#default#':
       - '25'
-      yes:
+      'yes':
       - '29'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isNotEqualString
           left:
@@ -906,11 +906,11 @@ tasks:
       brand: ''
       description: ''
     nexttasks:
-      yes:
+      'yes':
       - '29'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isNotEqualString
           left:

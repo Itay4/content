@@ -2,6 +2,7 @@ id: 2142f8de-29d5-4288-8426-0db39abe988b
 version: -1
 name: 'AWS - EC2 Test Playbook '
 starttaskid: "0"
+description: ''
 tasks:
   "0":
     id: "0"
@@ -13,6 +14,7 @@ tasks:
       name: ""
       iscommand: false
       brand: ""
+      description: ''
     nexttasks:
       '#none#':
       - "1"
@@ -1584,3 +1586,4 @@ view: |-
   }
 inputs: []
 outputs: []
+fromversion: 4.1.0

@@ -96,11 +96,11 @@ tasks:
       iscommand: false
       brand: ''
     nexttasks:
-      yes:
+      'yes':
       - '31'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isEqualString
           left:
@@ -163,11 +163,11 @@ tasks:
       iscommand: false
       brand: ''
     nexttasks:
-      yes:
+      'yes':
       - '6'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isNotEmpty
           left:
@@ -255,11 +255,11 @@ tasks:
       iscommand: false
       brand: ''
     nexttasks:
-      yes:
+      'yes':
       - '8'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isNotEmpty
           left:
@@ -345,11 +345,11 @@ tasks:
       iscommand: false
       brand: ''
     nexttasks:
-      yes:
+      'yes':
       - '30'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isNotEmpty
           left:
@@ -415,11 +415,11 @@ tasks:
       iscommand: false
       brand: ''
     nexttasks:
-      yes:
+      'yes':
       - '22'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isEqualString
           left:
@@ -551,11 +551,11 @@ tasks:
       brand: ''
       description: ''
     nexttasks:
-      yes:
+      'yes':
       - '29'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isEqualString
           left:
@@ -718,11 +718,11 @@ tasks:
       iscommand: false
       brand: ''
     nexttasks:
-      yes:
+      'yes':
       - '16'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isNotEmpty
           left:
@@ -792,11 +792,11 @@ tasks:
       iscommand: false
       brand: ''
     nexttasks:
-      yes:
+      'yes':
       - '18'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isNotEmpty
           left:
@@ -860,11 +860,11 @@ tasks:
       brand: ''
       description: ''
     nexttasks:
-      yes:
+      'yes':
       - '25'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isNotEmpty
           left:
@@ -1139,11 +1139,11 @@ tasks:
       iscommand: false
       brand: ''
     nexttasks:
-      yes:
+      'yes':
       - '20'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isEqualString
           left:
