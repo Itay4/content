@@ -578,14 +578,14 @@ workflows:
   commit:
     jobs:
       - build
-  nightly:
-    triggers:
-      - schedule:
-          cron: "0 0-23 * * *"
-          filters:
-            branches:
-              only:
-                - scheduled-trigger-test
-    jobs:
-      - build:
-          context: nightly_env
+  # nightly:
+  #   triggers:
+  #     - schedule:
+  #         cron: "0 0-23 * * *"
+  #         filters:
+  #           branches:
+  #             only:
+  #               - scheduled-trigger-test
+  #   jobs:
+  #     - build:
+  #         context: nightly_env
