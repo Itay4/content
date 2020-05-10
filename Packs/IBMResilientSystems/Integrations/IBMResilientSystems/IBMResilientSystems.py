@@ -13,7 +13,7 @@ logging.basicConfig()
 
 # disable insecure warnings
 requests.packages.urllib3.disable_warnings()
-resilient.co3.LOG.disable(logging.ERROR)
+# resilient.co3.LOG.disable(logging.ERROR)
 
 if not demisto.params()['proxy']:
     del os.environ['HTTP_PROXY']
@@ -28,6 +28,7 @@ USERNAME = demisto.params()['credentials']['identifier']
 PASSWORD = demisto.params()['credentials']['password']
 USE_SSL = not demisto.params().get('insecure', False)
 FETCH_TIME = demisto.params().get('fetch_time', '')
+TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
 INCIDENT_TYPE_DICT = {
     'CommunicationError': 17,
@@ -939,18 +940,18 @@ def fetch_incidents():
         last_incident_creation_time = resilient_incidents[0].get('create_date')  # the first incident's creation time
 
         for incident in resilient_incidents:
-            incident_creation_time = incident['create_date']
+            incident_creation_time = incident.get('create_date')
             if incident_creation_time > last_run:  # timestamp in milliseconds
-                artifacts = incident_artifacts(str(incident['id']))
+                artifacts = incident_artifacts(str(incident.get('id', '')))
                 if artifacts:
                     incident['artifacts'] = artifacts
-                attachments = incident_attachments(str(incident['id']))
+                attachments = incident_attachments(str(incident.get('id', '')))
                 if attachments:
                     incident['attachments'] = attachments
-                if isinstance(incident['description'], unicode):
+                if isinstance(incident.get('description'), unicode):
                     incident['description'] = incident['description'].replace('<div>', '').replace('</div>', '')
 
-                incident['discovered_date'] = normalize_timestamp(incident['discovered_date'])
+                incident['discovered_date'] = normalize_timestamp(incident.get('discovered_date'))
                 incident['create_date'] = normalize_timestamp(incident_creation_time)
 
                 demisto_incident = dict()  # type: dict
@@ -967,6 +968,27 @@ def fetch_incidents():
 
         demisto.setLastRun({'time': last_incident_creation_time})
     demisto.incidents(incidents)
+
+
+def test():
+    """Perform API call to check that the API is accessible.
+
+    Returns:
+        'ok' if test passed, anything else will fail the test.
+    """
+
+    global FETCH_TIME
+
+    if FETCH_TIME:
+        if FETCH_TIME[-1] != 'Z':
+            FETCH_TIME = FETCH_TIME + 'Z'
+
+        try:
+            datetime.strptime(FETCH_TIME, TIME_FORMAT)
+        except ValueError as error:
+            return_error('There is something wrong with the fetch date. Error: {}'.format(error))
+
+    demisto.results('ok')
 
 
 ''' EXECUTION CODE '''
@@ -986,7 +1008,7 @@ LOG('command is %s' % (demisto.command(),))
 try:
     if demisto.command() == 'test-module':
         # Checks if there is an authenticated session
-        demisto.results('ok')
+        test()
     elif demisto.command() == 'fetch-incidents':
         fetch_incidents()
     elif demisto.command() == 'rs-search-incidents':
