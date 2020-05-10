@@ -14,6 +14,7 @@ tasks:
       version: -1
       name: ""
       iscommand: false
+      description: ''
     nexttasks:
       '#none#':
       - "23"
@@ -129,6 +130,7 @@ tasks:
       name: Done
       type: title
       iscommand: false
+      description: ''
     separatecontext: false
     view: |-
       {
@@ -511,6 +513,7 @@ tasks:
       name: check_get_outputs
       type: condition
       iscommand: false
+      description: ''
     nexttasks:
       '#default#':
       - "22"
@@ -560,6 +563,7 @@ tasks:
       name: check_cases_outputs
       type: condition
       iscommand: false
+      description: ''
     nexttasks:
       '#default#':
       - "22"
@@ -651,6 +655,7 @@ tasks:
       name: check_alarms_outputs
       type: condition
       iscommand: false
+      description: ''
     nexttasks:
       '#default#':
       - "22"
@@ -794,3 +799,5 @@ view: |-
   }
 inputs: []
 outputs: []
+fromversion: 5.0.0
+description: ''
