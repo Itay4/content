@@ -1566,7 +1566,9 @@ script:
       isArray: false
       name: platform
       predefined:
-      - windows_linux_macos
+      - windows
+      - linux
+      - macos
       - android
       required: false
       secret: false

@@ -634,7 +634,9 @@ class Client(BaseClient):
         reply = self._http_request(
             method='POST',
             url_suffix='/hash_exceptions/blacklist/',
-            json_data={'request_data': request_data}
+            json_data={'request_data': request_data},
+            ok_codes=(500, 501),
+            resp_type = 'text'
         )
         return reply.get('reply')
 
@@ -646,7 +648,9 @@ class Client(BaseClient):
         reply = self._http_request(
             method='POST',
             url_suffix='/hash_exceptions/whitelist/',
-            json_data={'request_data': request_data}
+            json_data={'request_data': request_data},
+            ok_codes = (500, 501),
+            resp_type = 'text'
         )
         return reply.get('reply')
 
@@ -675,30 +679,41 @@ class Client(BaseClient):
         reply = self._http_request(
             method='POST',
             url_suffix='/audits/endpoints/quarantine/',
-            json_data={'request_data': request_data}
+            json_data={'request_data': request_data},
+            resp_type='text',
+            ok_codes=(500, 501)
         )
-        return reply.get('reply').get('data', [])
+        if isinstance(str, reply):
+            reply = json.loads(reply).get('reply')
+
+        if 'action_id' not in reply.keys():
+            return False, reply
+        return True, reply.get('reply')
 
     def restore_file(self, file_hash, endpoint_id=None):
-        request_data: Dict[str, Any] = {}
+        request_data: Dict[str, Any] = {'file_hash': file_hash}
 
-        request_data['file_hash'] = file_hash
         if endpoint_id:
             request_data['endpoint_id'] = endpoint_id
 
         reply = self._http_request(
             method='POST',
             url_suffix='/endpoints/restore/',
-            json_data={'request_data': request_data}
+            json_data={'request_data': request_data},
+            ok_codes=(500, 501),
+            resp_type='text'
         )
-        return reply.get('reply').get('data', [])
+        if isinstance(reply, (str)):
+            reply = json.loads(reply).get('reply')
 
-    def scan_endpoints(self, endpoint_id_list=None, dist_name=None, gte_first_seen=None, gte_last_seen=None, lte_first_seen=None,
+        if 'action_id' not in reply.keys():
+            return False, reply
+        return True, reply.get('reply')
+
+    def endpoint_scan(self, endpoint_id_list=None, dist_name=None, gte_first_seen=None, gte_last_seen=None, lte_first_seen=None,
                        lte_last_seen=None, ip_list=None, group_name=None, platform=None, alias=None, isolate=None, hostname=None):
-        # TODO: add in documentation: no params scans all endpoints
-
         request_data: Dict[str, Any] = {}
-        filters = {}
+        filters = []
 
         if endpoint_id_list:
             filters.append({
@@ -792,23 +807,29 @@ class Client(BaseClient):
         reply = self._http_request(
             method='POST',
             url_suffix='endpoints/scan/',
-            json_data={'request_data': request_data}
+            json_data={'request_data': request_data},
+            resp_type='text',
+            ok_codes=(500, 501)
         )
-        return reply.get('reply').get('data', [])
+        if isinstance(str, reply):
+            reply = json.loads(reply).get('reply')
+
+        if 'action_id' not in reply.keys():
+            return False, reply
+        return True, reply.get('reply')
 
     def get_quarantine_status(self, file_path, file_hash, endpoint_id):
-        request_data: Dict[str, Any] = {}
-        request_data['files'] = {
+        request_data: Dict[str, Any] = {'files': {
             'endpoint_id': endpoint_id,
             'file_path': file_path,
             'file_hash': file_hash
-        }
+        }}
         reply = self._http_request(
             method='POST',
             url_suffix='audits/quarantine/status/',
             json_data={'request_data': request_data}
         )
-        return reply.get('reply').get('data', [])
+        return reply.get('reply')
 
 
 def get_incidents_command(client, args):
@@ -1485,31 +1506,49 @@ def whitelist_files_command(client, args):
 
 
 def quarantine_files_command(client, args):
-    endpoint_id_list = args.get("endpoint_id_list")
-    isolate = args.get("isolate")  # TODO: isolated / unisolated
+    endpoint_id_list = argToList(args.get("endpoint_id_list"))
+    isolate = args.get("isolate")
     file_path = args.get("file_path")
     file_hash = args.get("file_hash")
 
     action_result = client.quarantine_files(
-        endpoint_id_list=argToList(endpoint_id_list),
+        endpoint_id_list=endpoint_id_list,
         isolate=isolate,
         file_path=file_path,
         file_hash=file_hash
     )
+    print('eh')
 
-    return action_result
+    # markdown_data = [{'action_id': file_hash} for file_hash in hash_list]
+    #
+    # return (
+    #     tableToMarkdown('Whitelist Files', markdown_data, ['action_id']),
+    #     {
+    #         f'{INTEGRATION_CONTEXT_BRAND}.Whitelist(val.id == obj.id)': hash_list
+    #     },
+    #     argToList(hash_list)
+    # )
 
 
 def restore_file_command(client, args):
     file_hash = args.get('file_hash')
     endpoint_id = args.get('endpoint_id')
 
-    action_result = client.quarantine_files(
+    action_result, details = client.restore_file(
         file_hash=file_hash,
         endpoint_id=endpoint_id
     )
+    if not action_result:
+        raise ValueError(f'There was a problem process this request: {details}')
+    action_id = details.get("action_id")
 
-    return action_result
+    return (
+        f'Restore file action was successful.\n action_id: {action_id}',
+        {
+            f'{INTEGRATION_CONTEXT_BRAND}.RestoredFiles(val.id == obj.id)': action_id
+        },
+        action_id
+    )
 
 
 def get_quarantine_status_command(client, args):
@@ -1679,7 +1718,7 @@ def main():
         elif demisto.command() == 'xdr-whitelist-files':
             return_outputs(*whitelist_files_command(client, demisto.args()))
 
-        elif demisto.command() == 'xdr-quarantine-file':
+        elif demisto.command() == 'xdr-quarantine-files':
             return_outputs(*quarantine_files_command(client, demisto.args()))
 
         elif demisto.command() == 'xdr-get-quarantine-status':
