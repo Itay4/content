@@ -607,6 +607,7 @@ script:
       - URL_LIST
       - IP_LIST
       - CATEGORY_LIST
+      - LOCAL_CATEGORY_DB
       required: true
       secret: false
     - default: false
@@ -727,10 +728,13 @@ script:
     execution: false
     name: symantec-mc-delete-policy-content
   dockerimage: demisto/python3:3.7.3.221
+  feed: false
   isfetch: false
+  longRunning: false
+  longRunningPort: false
   runonce: false
-  script: '-'
-  type: python
+  script: ''
   subtype: python3
+  type: python
 tests:
 - SymantecMC_TestPlaybook

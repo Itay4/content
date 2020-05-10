@@ -1,12 +1,13 @@
+import json
+from distutils.util import strtobool
+
+import requests
+
 import demistomock as demisto
 from CommonServerPython import *
-from CommonServerUserPython import *
 
 ''' IMPORTS '''
 
-import json
-import requests
-from distutils.util import strtobool
 
 # Disable insecure warnings
 requests.packages.urllib3.disable_warnings()
@@ -26,6 +27,7 @@ HEADERS = {
 URL_LIST_TYPE = 'URL_LIST'
 IP_LIST_TYPE = 'IP_LIST'
 CATEGORY_LIST_TYPE = 'CATEGORY_LIST'
+LOCAL_CATEGORY_DB_TYPE = 'LOCAL_CATEGORY_DB'
 
 ''' HELPER FUNCTIONS '''
 
@@ -82,7 +84,8 @@ def http_request(method, path, params=None, data=None):
 def verify_policy_content(content_type, ips, categories, urls):
     if ((content_type == IP_LIST_TYPE and not ips)
             or (content_type == URL_LIST_TYPE and not urls)
-            or (content_type == CATEGORY_LIST_TYPE and not categories)):
+            or (content_type == CATEGORY_LIST_TYPE and not categories))\
+            or (content_type == LOCAL_CATEGORY_DB_TYPE and not (categories and urls)):
         return_error('Incorrect content provided for the type {}'.format(content_type))
     if ((content_type == IP_LIST_TYPE and (urls or categories))
             or (content_type == URL_LIST_TYPE and (ips or categories))
@@ -776,6 +779,9 @@ def add_policy_content_command():
     elif content_type == CATEGORY_LIST_TYPE:
         add_policy_content_request(uuid, content_type, change_description, schema_version,
                                    categories=categories)
+    elif content_type == LOCAL_CATEGORY_DB_TYPE:
+        add_policy_content_request(uuid, content_type, change_description, schema_version,
+                                   urls=urls, categories=categories)
 
     return_outputs('Successfully added content to the policy', {}, {})
 
@@ -818,13 +824,29 @@ def add_policy_content_request(uuid, content_type, change_description, schema_ve
             'enabled': bool(strtobool(enabled))
         } for ip in ips]
     elif urls:
-        if 'urls' not in content['content']:
-            content['content']['urls'] = []
-        content['content']['urls'] += [{
-            'url': url,
-            'description': description,
-            'enabled': bool(strtobool(enabled))
-        } for url in urls]
+        if categories:  # content type is LOCAL_CATEGORY_DB
+            if 'categories' not in content['content']:
+                content['content']['categories'] = []
+            for category in categories:
+                entries = []
+                for url in urls:
+                    entries.append({
+                        'type': 'url',
+                        'url': url
+                    })
+                content['content']['categories'].append({
+                    'type': 'inline',
+                    'name': category,
+                    'entries': entries
+                })
+        else:
+            if 'urls' not in content['content']:
+                content['content']['urls'] = []
+            content['content']['urls'] += [{
+                'url': url,
+                'description': description,
+                'enabled': bool(strtobool(enabled))
+            } for url in urls]
     elif categories:
         if 'categories' not in content['content']:
             content['content']['categories'] = []
@@ -860,6 +882,8 @@ def delete_policy_content_command():
         delete_policy_content_request(uuid, content_type, change_description, schema_version, ips=ips)
     elif content_type == URL_LIST_TYPE:
         delete_policy_content_request(uuid, content_type, change_description, schema_version, urls=urls)
+    elif content_type == CATEGORY_LIST_TYPE:
+        delete_policy_content_request(uuid, content_type, change_description, schema_version, categories=categories)
     elif content_type == CATEGORY_LIST_TYPE:
         delete_policy_content_request(uuid, content_type, change_description, schema_version, categories=categories)
 
