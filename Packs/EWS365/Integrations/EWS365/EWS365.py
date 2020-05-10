@@ -250,14 +250,11 @@ def get_entry_for_object(title, context_key, obj, headers=None):
 def get_items_from_mailbox(account, item_ids):
     if type(item_ids) is not list:
         item_ids = [item_ids]
-    items = [Item(item_id=x) for x in item_ids]
+    items = [Item(id=x) for x in item_ids]
     result = list(account.fetch(ids=items))
     result = [x for x in result if not isinstance(x, ErrorItemNotFound)]
     if len(result) != len(item_ids):
         raise Exception("One or more items were not found. Check the input item ids")
-    # if exchangelib.__version__ != "1.12.0":  # Docker BC
-    #     for item in result:
-    #         item.folder = Folder(account=account) todo: remove if need be
     return result
 
 
@@ -1139,7 +1136,7 @@ def fetch_attachments_for_message(item_id, target_mailbox=None, attachment_ids=N
                 if attachment.content:
                     entries.append(get_entry_for_file_attachment(item_id, attachment))
             except TypeError as e:
-                if e.message != "must be string or buffer, not None":
+                if str(e) != "must be string or buffer, not None":
                     raise
         else:
             entries.append(
@@ -1447,7 +1444,7 @@ def create_folder(new_folder_name, folder_path, target_mailbox=None):
     return "Folder %s created successfully" % full_path
 
 
-def find_folders(target_mailbox=None, is_public=None):
+def find_folders(target_mailbox=None):
     account = get_account(target_mailbox or ACCOUNT_EMAIL)
     root = account.root
     # if exchangelib.__version__ == "1.12.0":  # Docker BC
@@ -1579,7 +1576,7 @@ def folder_to_context_entry(f):
     f_entry = {
         "name": f.name,
         "totalCount": f.total_count,
-        "id": f.folder_id,
+        "id": f.id,
         "childrenFolderCount": f.child_folder_count,
         "changeKey": f.changekey,
     }
@@ -1674,7 +1671,7 @@ def sub_main():
     ACCOUNT_EMAIL = params.get("defaultTargetMailbox")
     insecure = params.get("insecure", True)
     config, credentials = prepare(insecure)
-    protocol = config
+    protocol = BaseProtocol(config)
     args = prepare_args(demisto.args())
     start_logging()
     try:
