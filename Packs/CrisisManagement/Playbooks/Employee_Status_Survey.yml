@@ -88,7 +88,7 @@ tasks:
     form:
       questions:
       - id: '0'
-        label: ''
+        label: ''''
         labelarg:
           simple: Which out of the following options best represents your current
             health condition?
@@ -107,7 +107,7 @@ tasks:
         tooltip: ''
         readonly: false
       - id: '1'
-        label: ''
+        label: ''''
         labelarg:
           simple: Additional information about health concerns
         required: false
@@ -120,7 +120,7 @@ tasks:
         tooltip: 'These comments will be routed to the HR department. '
         readonly: false
       - id: '2'
-        label: ''
+        label: ''''
         labelarg:
           simple: Are you facing any IT related issues with your remote work setup?
         required: true
@@ -137,7 +137,7 @@ tasks:
           comments field below. '
         readonly: false
       - id: '3'
-        label: ''
+        label: ''''
         labelarg:
           simple: Additional information about IT concerns
         required: false
@@ -373,11 +373,11 @@ tasks:
     nexttasks:
       '#default#':
       - '9'
-      yes:
+      'yes':
       - '16'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: lessThan
           left:
@@ -704,12 +704,12 @@ tasks:
     nexttasks:
       '#default#':
       - '27'
-      yes:
+      'yes':
       - '22'
       - '11'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isExists
           left:
@@ -778,12 +778,12 @@ tasks:
     nexttasks:
       '#default#':
       - '29'
-      yes:
+      'yes':
       - '20'
       - '21'
     separatecontext: false
     conditions:
-    - label: yes
+    - label: 'yes'
       condition:
       - - operator: isExists
           left:
