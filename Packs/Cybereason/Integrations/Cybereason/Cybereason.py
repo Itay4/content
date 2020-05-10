@@ -1267,7 +1267,7 @@ def query_user_command():
 
 
 def query_user(filters):
-
+    demisto.debug("Entered query_user")
     query_fields = ['domain', 'ownerMachine', 'ownerOrganization', 'isLocalSystem', 'elementDisplayName']
     path = [
         {
@@ -1276,9 +1276,24 @@ def query_user(filters):
             'isResult': True
         }
     ]
+    demisto.debug("before build_query")
     json = build_query(query_fields, path)
+    demisto.debug("after build_query")
     cmd_url = '/rest/visualsearch/query/simple'
-    response = http_request('POST', cmd_url, json=json).json()
+    response = http_request('POST', cmd_url, json=json)
+    status = response.status_code
+    content = response.content
+    text = response.text
+    encoding = response.encoding
+    data_message = "Response status code is: {0}. Content is: {1}. Text is: {2}. Encoding is: {3}".format(status, content, text, encoding)
+    demisto.debug(data_message)
+    demisto.debug("Before trying to cast response to JSON")
+    try:
+        response = response.json()
+    except Exception as e:
+        error_message = "Failed casting response to JSON."
+        demisto.debug(error_message)
+        return_error(error_message)
     if response.get('status', '') == 'SUCCESS' and 'data' in response:
         return response['data']
     else:
@@ -1417,8 +1432,10 @@ def main():
 
     try:
         if demisto.command() == 'test-module':
+            demisto.debug("Entered test module")
             # Tests connectivity and credentails on login
             query_user([])
+            demisto.debug("Exited query_user")
             demisto.results('ok')
 
         elif demisto.command() == 'fetch-incidents':
