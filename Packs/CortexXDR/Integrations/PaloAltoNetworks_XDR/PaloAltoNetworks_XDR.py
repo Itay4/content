@@ -627,10 +627,9 @@ class Client(BaseClient):
         return reply.get('reply').get('data', [])
 
     def blacklist_files(self, hash_list, comment=None):
-        request_data: Dict[str, Any] = {}
-        request_data["hash_list"]: hash_list
+        request_data: Dict[str, Any] = {"hash_list": hash_list}
         if comment:
-            request_data["comment"]: comment
+            request_data["comment"] = comment
 
         reply = self._http_request(
             method='POST',
@@ -640,17 +639,16 @@ class Client(BaseClient):
         return reply.get('reply')
 
     def whitelist_files(self, hash_list, comment=None):
-        request_data: Dict[str, Any] = {}
-        request_data["hash_list"]: hash_list
+        request_data: Dict[str, Any] = {"hash_list": hash_list}
         if comment:
-            request_data["comment"]: comment
+            request_data["comment"] = comment
 
         reply = self._http_request(
             method='POST',
             url_suffix='/hash_exceptions/whitelist/',
             json_data={'request_data': request_data}
         )
-        return reply.get('reply').get('data', [])
+        return reply.get('reply')
 
     def quarantine_files(self, endpoint_id_list, isolate, file_path, file_hash):
         request_data: Dict[str, Any] = {}
@@ -1449,21 +1447,41 @@ def create_distribution_command(client, args):
 
 
 def blacklist_files_command(client, args):
-    hash_list = args.get('hash_list')
+    hash_list = argToList(args.get('hash_list'))
     comment = args.get('comment')
 
-    action_result = client.blacklist_files(hash_list=argToList(hash_list), comment=comment)
+    action_result = client.blacklist_files(hash_list=hash_list, comment=comment)
     if not action_result:
-        raise ValueError('')
-    return action_result
+        raise ValueError(f'There was a problem process this request: {action_result}')
+
+    markdown_data = [{'file_hash': file_hash} for file_hash in hash_list]
+
+    return (
+        tableToMarkdown('Blacklist Files', markdown_data, ['file_hash']),
+        {
+            f'{INTEGRATION_CONTEXT_BRAND}.Blacklist(val.id == obj.id)': hash_list
+        },
+        argToList(hash_list)
+    )
 
 
 def whitelist_files_command(client, args):
-    hash_list = args.get('hash_list')
+    hash_list = argToList(args.get('hash_list'))
     comment = args.get('comment')
 
-    action_result = client.whitelist_files(hash_list=argToList(hash_list), comment=comment)
-    return action_result
+    action_result = client.whitelist_files(hash_list=hash_list, comment=comment)
+    if not action_result:
+        raise ValueError(f'There was a problem process this request: {action_result}')
+
+    markdown_data = [{'file_hash': file_hash} for file_hash in hash_list]
+
+    return (
+        tableToMarkdown('Whitelist Files', markdown_data, ['file_hash']),
+        {
+            f'{INTEGRATION_CONTEXT_BRAND}.Whitelist(val.id == obj.id)': hash_list
+        },
+        argToList(hash_list)
+    )
 
 
 def quarantine_files_command(client, args):
