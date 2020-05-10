@@ -971,7 +971,7 @@ def fetch_incidents():
 
 
 def test():
-    """Perform API call to check that the API is accessible.
+    """Verify that the first_fetch parameter is according to the standards.
 
     Returns:
         'ok' if test passed, anything else will fail the test.
