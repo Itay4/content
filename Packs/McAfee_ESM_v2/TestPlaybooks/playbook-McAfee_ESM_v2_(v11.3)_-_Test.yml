@@ -373,7 +373,7 @@ tasks:
       iscommand: false
       description: ''
       brand: ''
-nexttasks:
+    nexttasks:
       '#default#':
       - "22"
       "yes":
