@@ -8,7 +8,7 @@ configuration:
   required: true
   type: 9
 - display: Email address from which to fetch incidents
-  name: defaultTargetMailbox
+  name: default_target_mailbox
   required: true
   type: 0
 - defaultvalue: Inbox
@@ -19,7 +19,7 @@ configuration:
   type: 0
 - defaultvalue: 'false'
   display: Public Folder
-  name: isPublicFolder
+  name: is_public_folder
   required: false
   type: 8
 - defaultvalue: 'false'
@@ -37,7 +37,7 @@ configuration:
   required: false
   type: 8
 - display: Mark fetched emails as read
-  name: markAsRead
+  name: mark_as_read
   required: false
   type: 8
 - display: Incident type
@@ -50,12 +50,12 @@ configuration:
   type: 8
 - defaultvalue: '120'
   display: Timeout (in seconds) for HTTP requests to Exchange Server
-  name: requestTimeout
+  name: request_timeout
   required: false
   type: 0
 - defaultvalue: '50'
   display: Max incidents per fetch
-  name: maxFetch
+  name: max_fetch
   required: false
   type: 0
 - defaultvalue: 'false'
