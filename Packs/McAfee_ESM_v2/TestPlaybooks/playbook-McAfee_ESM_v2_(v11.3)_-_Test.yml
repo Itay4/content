@@ -15,6 +15,7 @@ tasks:
       name: ""
       iscommand: false
       description: ''
+      brand: ''
     nexttasks:
       '#none#':
       - "23"
@@ -38,9 +39,10 @@ tasks:
       version: -1
       name: ' add_case_status'
       description: Add a case status
-      script: McAfee ESM_v2|||esm-add-case-status
+      script: 'esm-add-case-status'
       type: regular
       iscommand: true
+      brand: ''
     nexttasks:
       '#none#':
       - "2"
@@ -68,9 +70,10 @@ tasks:
       version: -1
       name: edit_case_status
       description: Edit a case status
-      script: '|||esm-edit-case-status'
+      script: 'esm-edit-case-status'
       type: regular
       iscommand: true
+      brand: ''
     nexttasks:
       '#none#':
       - "3"
@@ -100,9 +103,10 @@ tasks:
       version: -1
       name: delete_case_status
       description: Delete a case status
-      script: '|||esm-delete-case-status'
+      script: 'esm-delete-case-status'
       type: regular
       iscommand: true
+      brand: ''
     nexttasks:
       '#none#':
       - "4"
@@ -131,6 +135,7 @@ tasks:
       type: title
       iscommand: false
       description: ''
+      brand: ''
     separatecontext: false
     view: |-
       {
@@ -151,7 +156,8 @@ tasks:
       version: -1
       name: add_case
       description: Add a case to the system
-      script: '|||esm-add-case'
+      brand: ''
+      script: 'esm-add-case'
       type: regular
       iscommand: true
     nexttasks:
@@ -184,9 +190,10 @@ tasks:
       version: -1
       name: edit_case
       description: Edit an existing case
-      script: '|||esm-edit-case'
+      script: 'esm-edit-case'
       type: regular
       iscommand: true
+      brand: ''
     nexttasks:
       '#none#':
       - "19"
@@ -219,9 +226,10 @@ tasks:
       version: -1
       name: get_organization_list
       description: Get case organization
-      script: '|||esm-get-organization-list'
+      script: 'esm-get-organization-list'
       type: regular
       iscommand: true
+      brand: ''
     nexttasks:
       '#none#':
       - "8"
@@ -245,9 +253,10 @@ tasks:
       version: -1
       name: get_user_list
       description: Get a list of all users.
-      script: '|||esm-get-user-list'
+      script: 'esm-get-user-list'
       type: regular
       iscommand: true
+      brand: ''
     nexttasks:
       '#none#':
       - "9"
@@ -271,9 +280,10 @@ tasks:
       version: -1
       name: get_case_list
       description: Get a list of cases from the system
-      script: '|||esm-get-case-list'
+      script: 'esm-get-case-list'
       type: regular
       iscommand: true
+      brand: ''
     nexttasks:
       '#none#':
       - "10"
@@ -300,9 +310,10 @@ tasks:
       version: -1
       name: get_case_statuses
       description: Get a list of valid case statuses from the system
-      script: '|||esm-get-case-statuses'
+      script: 'esm-get-case-statuses'
       type: regular
       iscommand: true
+      brand: ''
     nexttasks:
       '#none#':
       - "17"
@@ -326,9 +337,10 @@ tasks:
       version: -1
       name: fetch_alarms
       description: Retrieves a list of alarms that have been triggered
-      script: '|||esm-fetch-alarms'
+      script: 'esm-fetch-alarms'
       type: regular
       iscommand: true
+      brand: ''
     nexttasks:
       '#none#':
       - "4"
@@ -360,7 +372,8 @@ tasks:
       type: condition
       iscommand: false
       description: ''
-    nexttasks:
+      brand: ''
+nexttasks:
       '#default#':
       - "22"
       "yes":
@@ -410,6 +423,7 @@ tasks:
       type: condition
       iscommand: false
       description: ''
+      brand: ''
     nexttasks:
       '#default#':
       - "22"
@@ -458,9 +472,10 @@ tasks:
       version: -1
       name: get_case_detail
       description: Get detail on an existing case
-      script: '|||esm-get-case-detail'
+      script: 'esm-get-case-detail'
       type: regular
       iscommand: true
+      brand: ''
     nexttasks:
       '#none#':
       - "18"
@@ -490,6 +505,7 @@ tasks:
       scriptName: PrintErrorEntry
       type: regular
       iscommand: false
+      brand: ''
     scriptarguments:
       message:
         simple: failed to run McAfee ESM v2 test playbook
@@ -516,6 +532,7 @@ tasks:
       scriptName: DeleteContext
       type: regular
       iscommand: false
+      brand: ''
     nexttasks:
       '#none#':
       - "1"
