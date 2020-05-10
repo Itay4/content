@@ -44,33 +44,10 @@ configuration:
   name: incidentType
   required: false
   type: 13
-- display: |-
-    ┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉
-    ‎                                           Manual Mode
-    Exchange Server Hostname or IP address
-  name: ewsServer
-  required: false
-  type: 0
-- display: DOMAIN\USERNAME (e.g. DEMISTO.INT\admin)
-  name: domainAndUserman
-  required: false
-  type: 0
-- display: 'Exchange Server Version (On-Premise only. Supported versions: 2007, 2010,
-    2010_SP2, 2013, and 2016)'
-  name: defaultServerVersion
-  required: false
-  type: 0
 - display: Trust any certificate (not secure)
   name: insecure
   required: false
   type: 8
-- display: |-
-    ┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉
-    ‎                                         Advanced Mode
-    Override Authentication Type (NTLM, Basic, or Digest).
-  name: authType
-  required: false
-  type: 0
 - defaultvalue: '120'
   display: Timeout (in seconds) for HTTP requests to Exchange Server
   name: requestTimeout
@@ -1003,89 +980,6 @@ script:
     - contextPath: EWS.Folders.unreadCount
       description: Number of unread emails in the folder.
       type: number
-  - arguments:
-    - default: true
-      description: Query to use to find emails.
-      isArray: false
-      name: query
-      required: true
-      secret: false
-    deprecated: false
-    description: Starts a compliance search.
-    execution: false
-    name: ews-o365-start-compliance-search
-    outputs:
-    - contextPath: EWS.ComplianceSearch.Name
-      description: The name of the compliance search.
-      type: string
-    - contextPath: EWS.ComplianceSearch.Status
-      description: The status of the compliance search.
-      type: string
-  - arguments:
-    - default: true
-      description: The name of the compliance search.
-      isArray: false
-      name: search-name
-      required: true
-      secret: false
-    deprecated: false
-    description: Returns the status and results of a compliance search.
-    execution: false
-    name: ews-o365-get-compliance-search
-    outputs:
-    - contextPath: EWS.ComplianceSearch.Status
-      description: The status of the compliance search.
-      type: Unknown
-  - arguments:
-    - default: true
-      description: The name of the compliance search.
-      isArray: false
-      name: search-name
-      required: true
-      secret: false
-    deprecated: false
-    description: Purges the results found in the compliance search.
-    execution: false
-    name: ews-o365-purge-compliance-search-results
-    outputs:
-    - contextPath: EWS.ComplianceSearch.Status
-      description: The status of the compliance search.
-      type: string
-  - arguments:
-    - default: true
-      description: The name of the compliance search.
-      isArray: false
-      name: search-name
-      required: true
-      secret: false
-    deprecated: false
-    description: Removes the compliance search.
-    execution: false
-    name: ews-o365-remove-compliance-search
-    outputs:
-    - contextPath: EWS.ComplianceSearch.Status
-      description: The status of the compliance search.
-      type: string
-  - arguments:
-    - default: true
-      description: The name of the compliance search.
-      isArray: false
-      name: search-name
-      required: true
-      secret: false
-    deprecated: false
-    description: Checks the status of the purge operation on the compliance search.
-    execution: false
-    name: ews-o365-get-compliance-search-purge-status
-    outputs:
-    - contextPath: EWS.ComplianceSearch.Status
-      description: The status of the compliance search.
-      type: Unknown
-  - deprecated: false
-    description: Returns the auto-discovery information. Can be used to manually configure
-      the Exchange Server.
-    execution: false
-    name: ews-get-autodiscovery-config
   - arguments:
     - default: false
       description: Email address of the group to expand.
