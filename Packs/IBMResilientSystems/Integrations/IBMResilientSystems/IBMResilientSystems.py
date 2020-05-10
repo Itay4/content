@@ -927,6 +927,7 @@ def related_incidents(incident_id):
 def fetch_incidents():
     last_run = demisto.getLastRun() and demisto.getLastRun().get('time')
     if not last_run:
+        last_run = date_to_timestamp(FETCH_TIME)
         args = {'date-created-after': FETCH_TIME}
     else:
         args = {'date-created-after': normalize_timestamp(last_run)}
@@ -938,31 +939,31 @@ def fetch_incidents():
         last_incident_creation_time = resilient_incidents[0].get('create_date')  # the first incident's creation time
 
         for incident in resilient_incidents:
-            artifacts = incident_artifacts(str(incident['id']))
-            if artifacts:
-                incident['artifacts'] = artifacts
-            attachments = incident_attachments(str(incident['id']))
-            if attachments:
-                incident['attachments'] = attachments
-            if isinstance(incident['description'], unicode):
-                incident['description'] = incident['description'].replace('<div>', '').replace('</div>', '')
-
             incident_creation_time = incident['create_date']
+            if incident_creation_time > last_run:  # timestamp in milliseconds
+                artifacts = incident_artifacts(str(incident['id']))
+                if artifacts:
+                    incident['artifacts'] = artifacts
+                attachments = incident_attachments(str(incident['id']))
+                if attachments:
+                    incident['attachments'] = attachments
+                if isinstance(incident['description'], unicode):
+                    incident['description'] = incident['description'].replace('<div>', '').replace('</div>', '')
 
-            incident['discovered_date'] = normalize_timestamp(incident['discovered_date'])
-            incident['create_date'] = normalize_timestamp(incident_creation_time)
+                incident['discovered_date'] = normalize_timestamp(incident['discovered_date'])
+                incident['create_date'] = normalize_timestamp(incident_creation_time)
 
-            demisto_incident = dict()  # type: dict
+                demisto_incident = dict()  # type: dict
 
-            demisto_incident['name'] = 'IBM Resilient Systems incident ID ' + str(incident['id'])
-            demisto_incident['occurred'] = incident['create_date']
-            demisto_incident['rawJSON'] = json.dumps(incident)
+                demisto_incident['name'] = 'IBM Resilient Systems incident ID ' + str(incident['id'])
+                demisto_incident['occurred'] = incident['create_date']
+                demisto_incident['rawJSON'] = json.dumps(incident)
 
-            # updating last creation time if needed
-            if incident_creation_time > last_incident_creation_time:
-                last_incident_creation_time = incident_creation_time
+                incidents.append(demisto_incident)
 
-            incidents.append(demisto_incident)
+                # updating last creation time if needed
+                if incident_creation_time > last_incident_creation_time:
+                    last_incident_creation_time = incident_creation_time
 
         demisto.setLastRun({'time': last_incident_creation_time})
     demisto.incidents(incidents)
