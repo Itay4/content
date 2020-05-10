@@ -1,5 +1,6 @@
 ## [Unreleased]
-Fixed an issue where the proxy field is not configured.
+ - Fixed an issue where the proxy field is not configured.
+ - Fixed an issue where the context did not update properly for ***awake-query-activities***, ***awake-query-devices*** and ***awake-query-activities*** commands.
 
 
 ## [19.8.0] - 2019-08-06
