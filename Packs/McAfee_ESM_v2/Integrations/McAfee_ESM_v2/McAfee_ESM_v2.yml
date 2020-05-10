@@ -82,14 +82,14 @@ name: McAfee ESM v2
 script:
   commands:
   - deprecated: false
-    description: Get all fields that can be used in query filters, with type information
+    description: Gets all fields that can be used in query filters, including type information
       for each field
     execution: false
     name: esm-fetch-fields
   - arguments:
     - auto: PREDEFINED
       default: false
-      description: The time period for the search
+      description: The time period for the search. Can be LAST_3_DAYS, LAST_2_DAYS, LAST_24_HOURS, PREVIOUS_DAY, CURRENT_DAY, LAST_HOUR, LAST_30_MINUTES, LAST_10_MINUTES, LAST_MINUTE, CUSTOM, PREVIOUS_YEAR, CURRENT_YEAR, PREVIOUS_QUARTER, CURRENT_QUARTER, PREVIOUS_MONTH, CURRENT_MONTH, PREVIOUS_WEEK, or CURRENT_WEEK. 
       isArray: false
       name: timeRange
       predefined:
@@ -114,7 +114,7 @@ script:
       required: false
       secret: false
     - default: false
-      description: Filter on the query results, should be a json string, of the format
+      description: Filter on the query results, should be a JSON string, of the format
         EsmFilter (read more on that here - https://<esm-ip>:<esm-port>/rs/esm/help/types/EsmFilter)
       isArray: false
       name: filters
@@ -122,8 +122,7 @@ script:
       secret: false
     - auto: PREDEFINED
       default: false
-      description: 'Query type to preform, by default EVENT (other possible values
-        are : FLOW/ASSET)'
+      description: 'Type of query to run. Can be "EVENT", "FLOW", or "ASSETS". Default is "EVENT".'
       isArray: false
       name: queryType
       predefined:
@@ -133,19 +132,19 @@ script:
       required: false
       secret: false
     - default: false
-      description: Maximum time to wait (in minutes), default is 30
+      description: Maximum time to wait before timeout (in minutes). Default is 30.
       isArray: false
       name: timeOut
       required: false
       secret: false
     - default: false
-      description: if timeRange is CUSTOM, start time for the time range (e.g. 2017-06-01T12:48:16.734Z)
+      description: 'If the timeRange argument is set to CUSTOM, the start time for the time range. For example: 2017-06-01T12:48:16.734Z'
       isArray: false
       name: customStart
       required: false
       secret: false
     - default: false
-      description: if timeRange is CUSTOM, end time for the time range (e.g. 2017-06-01T12:48:16.734Z)
+      description: 'If the timeRange argument is set to CUSTOM, the end time for the time range. For example: 2017-06-01T12:48:16.734Z'
       isArray: false
       name: customEnd
       required: false
@@ -169,7 +168,7 @@ script:
   - arguments:
     - auto: PREDEFINED
       default: false
-      description: The time period for the fetch
+      description: The time period for the search. Can be LAST_3_DAYS, LAST_2_DAYS, LAST_24_HOURS, PREVIOUS_DAY, CURRENT_DAY, LAST_HOUR, LAST_30_MINUTES, LAST_10_MINUTES, LAST_MINUTE, CUSTOM, PREVIOUS_YEAR, CURRENT_YEAR, PREVIOUS_QUARTER, CURRENT_QUARTER, PREVIOUS_MONTH, CURRENT_MONTH, PREVIOUS_WEEK, or CURRENT_WEEK.
       isArray: false
       name: timeRange
       predefined:
@@ -194,21 +193,21 @@ script:
       required: false
       secret: false
     - default: false
-      description: if timeRange is CUSTOM, start time for the time range (e.g. 2017-06-01T12:48:16.734Z)
+      description: 'If the timeRange argument is set to CUSTOM, the start time for the time range. For example: 2017-06-01T12:48:16.734Z'
       isArray: false
       name: customStart
       required: false
       secret: false
     - default: false
-      description: if timeRange is CUSTOM, end time for the time range (e.g. 2017-06-01T12:48:16.734Z)
+      description: 'If the timeRange argument is set to CUSTOM, the end time for the time range. For example: 2017-06-01T12:48:16.734Z'
       isArray: false
       name: customEnd
       required: false
       secret: false
     - auto: PREDEFINED
       default: false
-      description: 'user assigned to handle this triggered alarm (use ''ME'' option
-        to use instance user, or use format EsmUser (read more on that here - https://<esm-ip>:<esm-port>/rs/esm/help/types/EsmUser) '
+      description: 'User assigned to handle the triggered alarm. Use the ''ME'' option
+        to use the instance user, or use [format EsmUser](https://<esm-ip>:<esm-port>/rs/esm/help/types/EsmUser). '
       isArray: false
       name: assignedUser
       predefined:
@@ -217,224 +216,222 @@ script:
       required: false
       secret: false
     deprecated: false
-    description: Retrieves a list of alarms that have been triggered
+    description: Retrieves a list of triggered alarms.
     execution: false
     name: esm-fetch-alarms
     outputs:
     - contextPath: McAfeeESM.Alarm.ID
-      description: Alarm ID
+      description: Alarm ID.
       type: number
     - contextPath: McAfeeESM.Alarm.summary
-      description: Alarm summary
+      description: Alarm summary.
       type: string
     - contextPath: McAfeeESM.Alarm.assignee
-      description: Alarm assignee
+      description: Alarm assignee.
       type: string
     - contextPath: McAfeeESM.Alarm.severity
-      description: Alarm severity
+      description: Alarm severity.
       type: number
     - contextPath: McAfeeESM.Alarm.triggeredDate
-      description: Alarm triggered date
+      description: Alarm triggered date.
       type: date
     - contextPath: McAfeeESM.Alarm.acknowledgedDate
-      description: Alarm acknowledged date
+      description: Alarm acknowledged date.
       type: date
     - contextPath: McAfeeESM.Alarm.acknowledgedUsername
-      description: Alarm acknowledged username
+      description: Alarm acknowledged username.
       type: string
     - contextPath: McAfeeESM.Alarm.alarmName
-      description: Alarm name
+      description: Alarm name.
       type: string
     - contextPath: McAfeeESM.Alarm.conditionType
-      description: Alarm condition type
+      description: Alarm condition type.
       type: number
   - arguments:
     - default: false
-      description: Filter for a case opened before this date. Given in format "<number>         <time
-        unit>",e.g. 1 day,30 minutes,2 weeks,6 months,1 year
+      description: 'Filters for cases that were opened before this date. In the format "<number><timeunit>", for example: 1 day,30 minutes,2 weeks,6 months,1 year'
       isArray: false
       name: since
       required: false
       secret: false
     deprecated: false
-    description: Get a list of cases from the system
+    description: Gets a list of cases from McAfee ESM.
     execution: false
     name: esm-get-case-list
     outputs:
     - contextPath: McAfeeESM.Case.ID
-      description: The ID of the case
+      description: Case ID.
       type: number
     - contextPath: McAfeeESM.Case.Summary
-      description: The summary of the case
+      description: The summary of the case.
       type: string
     - contextPath: McAfeeESM.Case.Status
-      description: The status of the case
+      description: The status of the case.
       type: string
     - contextPath: McAfeeESM.Case.OpenTime
-      description: The open time of the case
+      description: The date and time when the case was opened.
       type: date
     - contextPath: McAfeeESM.Case.Severity
-      description: The severity of the case
+      description: The severity of the case.
       type: number
   - arguments:
     - default: true
-      description: the name of the case
+      description: The name of the case.
       isArray: false
       name: summary
       required: true
       secret: false
     - default: false
       defaultValue: Open
-      description: the status of the case (use `esm-get-case-statuses` to view all
-        statuses)
+      description: The status of the case. Run the esm-get-case-statuses command to view all statuses.
       isArray: false
       name: status
       required: false
       secret: false
     - default: false
       defaultValue: me
-      description: who the case is assigned to
+      description: User assigned to the case.
       isArray: false
       name: assignee
       required: false
       secret: false
     - default: false
       defaultValue: '1'
-      description: the severity of the case (1 - 100)
+      description: The severity of the case (1 - 100).
       isArray: false
       name: severity
       required: false
       secret: false
     - default: false
-      description: the organization assigned to the case  (use `esm-get-organization-list`
-        to view all ogranizations)
+      description: The organization assigned to the case. Run the esm-get-organization-list command 
+        to view all organizations.
       isArray: false
       name: organization
       required: false
       secret: false
     deprecated: false
-    description: Add a case to the system
+    description: Adds a case to the system.
     execution: false
     name: esm-add-case
     outputs:
     - contextPath: McAfeeESM.Case.ID
-      description: The ID of the case
+      description: The ID of the case.
       type: number
     - contextPath: McAfeeESM.Case.Summary
-      description: The summary of the case
+      description: The summary of the case.
       type: string
     - contextPath: McAfeeESM.Case.Status
-      description: The status of the case
+      description: The status of the case.
       type: string
     - contextPath: McAfeeESM.Case.OpenTime
-      description: The open time of the case
+      description: The open time of the case.
       type: date
     - contextPath: McAfeeESM.Case.Severity
-      description: The severity of the case
+      description: The severity of the case.
       type: number
     - contextPath: McAfeeESM.Case.Assignee
-      description: The Assignee of the case
+      description: The assignee of the case.
       type: string
     - contextPath: McAfeeESM.Case.Organization
-      description: The organization of the case
+      description: The organization of the case.
       type: string
     - contextPath: McAfeeESM.Case.EventList
-      description: List of case's events
+      description: List of the case's events.
       type: Unknown
     - contextPath: McAfeeESM.Case.Notes
-      description: List of case's notes
+      description: List of the case's notes.
       type: Unknown
   - arguments:
     - default: true
-      description: the id of the case
+      description: The ID of the case.
       isArray: false
       name: id
       required: true
       secret: false
     - default: false
-      description: the name of the case
+      description: The name of the case.
       isArray: false
       name: summary
       required: false
       secret: false
     - default: false
-      description: the new severity of the case (1 - 100)
+      description: The new severity of the case (1 - 100).
       isArray: false
       name: severity
       required: false
       secret: false
     - default: false
-      description: who the case should be assigned to
+      description: User assigned to the case.
       isArray: false
       name: assignee
       required: false
       secret: false
     - default: false
-      description: the new status of the case (use `esm-get-case-statuses` to view
-        all statuses)
+      description: The new status of the case. Run the esm-get-case-statuses command to view
+        all statuses.
       isArray: false
       name: status
       required: false
       secret: false
     - default: false
-      description: the organization assigned to the case  (use `esm-get-organization-list`
-        to view all ogranizations)
+      description: The organization assigned to the case. Run the esm-get-organization-list command
+        to view all organizations.
       isArray: false
       name: organization
       required: false
       secret: false
     deprecated: false
-    description: Edit an existing case
+    description: Edit the details of an existing case.
     execution: false
     name: esm-edit-case
     outputs:
     - contextPath: McAfeeESM.Case.ID
-      description: The ID of the case
+      description: The ID of the case.
       type: number
     - contextPath: McAfeeESM.Case.Summary
-      description: The summary of the case
+      description: The summary of the case.
       type: string
     - contextPath: McAfeeESM.Case.Status
-      description: The status of the case
+      description: The status of the case.
       type: string
     - contextPath: McAfeeESM.Case.OpenTime
-      description: The open time of the case
+      description: The open time of the case.
       type: date
     - contextPath: McAfeeESM.Case.Severity
-      description: The severity of the case
+      description: The severity of the case.
       type: number
     - contextPath: McAfeeESM.Case.Assignee
-      description: The Assignee of the case
+      description: The assignee of the case.
       type: string
     - contextPath: McAfeeESM.Case.Organization
-      description: The organization of the case
+      description: The organization of the case.
       type: string
     - contextPath: McAfeeESM.Case.EventList
-      description: List of case's events
+      description: List of the case's events.
       type: Unknown
     - contextPath: McAfeeESM.Case.Notes
-      description: List of case's notes
+      description: List of the case's notes.
       type: Unknown
   - deprecated: false
-    description: Get a list of valid case statuses from the system
+    description: Gets a list of valid case statuses from the system.
     execution: false
     name: esm-get-case-statuses
   - arguments:
     - default: true
-      description: the name of the case status to edit
+      description: The name of the case status to edit.
       isArray: false
       name: original_name
       required: true
       secret: false
     - default: false
-      description: the new name for the case status
+      description: The new name for the case status.
       isArray: false
       name: new_name
       required: true
       secret: false
     - auto: PREDEFINED
       default: false
-      description: whether the status be shown in case pane
+      description: Whether the status will display in the case pane. Can be "True" or "False". Default is "True".
       isArray: false
       name: show_in_case_pane
       predefined:
@@ -443,72 +440,72 @@ script:
       required: false
       secret: false
     deprecated: false
-    description: Edit a case status
+    description: Edits the status of a case.
     execution: false
     name: esm-edit-case-status
   - arguments:
     - default: true
-      description: the ID of the case
+      description: The ID of the case.
       isArray: false
       name: id
       required: true
       secret: false
     deprecated: false
-    description: Get detail on an existing case
+    description: Gets the details of an existing case.
     execution: false
     name: esm-get-case-detail
     outputs:
     - contextPath: McAfeeESM.Case.ID
-      description: The ID of the case
+      description: The ID of the case.
       type: number
     - contextPath: McAfeeESM.Case.Summary
-      description: The summary of the case
+      description: The summary of the case.
       type: string
     - contextPath: McAfeeESM.Case.Status
-      description: The status of the case
+      description: The status of the case.
       type: string
     - contextPath: McAfeeESM.Case.OpenTime
-      description: The open time of the case
+      description: The open time of the case.
       type: date
     - contextPath: McAfeeESM.Case.Severity
-      description: The severity of the case
+      description: The severity of the case.
       type: number
     - contextPath: McAfeeESM.Case.Assignee
-      description: The Assignee of the case
+      description: The assignee of the case.
       type: string
     - contextPath: McAfeeESM.Case.Organization
-      description: The organization of the case
+      description: The organization of the case.
       type: string
     - contextPath: McAfeeESM.Case.EventList
-      description: List of case's events
+      description: List of the case's events.
       type: Unknown
     - contextPath: McAfeeESM.Case.Notes
-      description: List of case's notes
+      description: List of the case's notes.
       type: Unknown
   - arguments:
     - default: false
-      description: Comma separated  list of event IDs
+      description: Comma-separated list of event IDs.
       isArray: false
       name: ids
       required: true
       secret: false
     deprecated: false
-    description: Get case events details
+    description: Gets case event details.
     execution: false
     name: esm-get-case-event-list
     outputs:
     - contextPath: McAfeeESM.CaseEvent.ID
-      description: The ID of the event
+      description: The ID of the event.
       type: string
     - contextPath: McAfeeESM.CaseEvent.LastTime
-      description: The last updated time of the event
+      description: The time the event was last updated.
       type: date
     - contextPath: McAfeeESM.CaseEvent.Message
-      description: The massage of the event
+      description: The message of the event.
       type: string
   - arguments:
     - default: true
-      description: the name of the case status
+      description: The name of the case status.
       isArray: false
       name: name
       required: true
@@ -516,7 +513,7 @@ script:
     - auto: PREDEFINED
       default: false
       defaultValue: 'True'
-      description: whether the status be shown in case pane
+      description: Whether the status will display in the case pane. Can be "True" or "False". Default is "True".
       isArray: false
       name: show_in_case_pane
       predefined:
@@ -525,209 +522,206 @@ script:
       required: false
       secret: false
     deprecated: false
-    description: Add a case status
+    description: Adds a status to the specified case.
     execution: false
     name: esm-add-case-status
   - arguments:
     - default: true
-      description: the name of the case status to delete
+      description: The name of the case status to delete.
       isArray: false
       name: name
       required: true
       secret: false
     deprecated: false
-    description: Delete a case status
+    description: Deletes the status of a case.
     execution: false
     name: esm-delete-case-status
   - deprecated: false
-    description: Get case organization
+    description: Gets a case organization.
     execution: false
     name: esm-get-organization-list
     outputs:
     - contextPath: McAfeeESM.Organization.ID
-      description: Organization ID
+      description: Organization ID.
       type: number
     - contextPath: McAfeeESM.Organization.Name
-      description: Organization Name
+      description: Organization name.
       type: string
   - deprecated: false
-    description: Get a list of all users.
+    description: Gets a list of all users.
     execution: false
     name: esm-get-user-list
     outputs:
     - contextPath: McAfeeESM.User.ID
-      description: the ID of the user
+      description: The ID of the user.
       type: number
     - contextPath: McAfeeESM.User.Name
-      description: the esm user name
+      description: The ESM user name.
       type: string
     - contextPath: McAfeeESM.User.Email
-      description: the e-mail of the user
+      description: The email address of the user.
       type: string
     - contextPath: McAfeeESM.User.SMS
-      description: the SMS details of the user
+      description: The SMS details of the user.
       type: string
     - contextPath: McAfeeESM.User.IsMaster
-      description: whether the user is a master user
+      description: Whether the user is a master user.
       type: boolean
     - contextPath: McAfeeESM.User.IsAdmin
-      description: whether the user is an admin
+      description: Whether the user is an admin.
       type: boolean
   - arguments:
     - default: true
-      description: list of triggered alarm ids to be marked acknowledged separated
-        with commas
+      description: Comma-separated list of triggered alarm IDs to be marked as acknowledged.
       isArray: true
       name: alarmIds
       required: true
       secret: false
     deprecated: false
-    description: Mark triggered alarms as acknowledged
+    description: Marks triggered alarms as acknowledged.
     execution: false
     name: esm-acknowledge-alarms
   - arguments:
     - default: true
-      description: list of triggered alarm ids to be marked unacknowledged separated
-        with commas
+      description: Comma-separated list of triggered alarm IDs to be marked as unacknowledged.
       isArray: true
       name: alarmIds
       required: true
       secret: false
     deprecated: false
-    description: Mark triggered alarms as unacknowledged
+    description: Marks triggered alarms as unacknowledged.
     execution: false
     name: esm-unacknowledge-alarms
   - arguments:
     - default: true
-      description: list of triggered alarm ids to be deleted separated with commas
+      description: Comma-separated list of triggered alarm IDs to delete.
       isArray: true
       name: alarmIds
       required: true
       secret: false
     deprecated: false
-    description: Delete triggered alarms
+    description: Deletes triggered alarms.
     execution: false
     name: esm-delete-alarms
   - arguments:
     - default: true
-      description: The event to get the details for. the ID can be taken from esm-list-alarm-events.
+      description: The event for which to get the details. Run the esm-list-alarm-events command to get the ID.
       isArray: false
       name: eventId
       required: true
       secret: false
     deprecated: false
-    description: Gets the details for the triggered alarm
+    description: Gets the details for the triggered alarm.
     execution: false
     name: esm-get-alarm-event-details
     outputs:
     - contextPath: McAfeeESM.AlarmEvent.ID
-      description: Event ID
+      description: Event ID.
       type: string
     - contextPath: McAfeeESM.AlarmEvent.SubType
-      description: Event Type
+      description: Event type.
       type: string
     - contextPath: McAfeeESM.AlarmEvent.Severity
-      description: Event Severity
+      description: Event severity.
       type: number
     - contextPath: McAfeeESM.AlarmEvent.Message
-      description: Event Message
+      description: Event message.
       type: string
     - contextPath: McAfeeESM.AlarmEvent.LastTime
-      description: Event Time
+      description: Event time.
       type: date
     - contextPath: McAfeeESM.AlarmEvent.SrcIP
-      description: Source IP of the event
+      description: Source IP of the event.
       type: string
     - contextPath: McAfeeESM.AlarmEvent.DstIP
-      description: Destination IP of the event
+      description: Destination IP of the event.
       type: string
     - contextPath: McAfeeESM.AlarmEvent.Cases
-      description: A list of related cases to the event
+      description: A list of cases related to the event.
       type: Unknown
     - contextPath: McAfeeESM.AlarmEvent.Cases.ID
-      description: Case ID
+      description: Case ID.
       type: string
     - contextPath: McAfeeESM.AlarmEvent.Cases.OpenTime
-      description: Case creation time
+      description: Case creation time.
       type: date
     - contextPath: McAfeeESM.AlarmEvent.Cases.Severity
-      description: Case severity
+      description: Case severity.
       type: number
     - contextPath: McAfeeESM.AlarmEvent.Cases.Status
-      description: Case status
+      description: Case status.
       type: string
     - contextPath: McAfeeESM.AlarmEvent.Cases.Summary
-      description: Case summary
+      description: Case summary.
       type: string
     - contextPath: McAfeeESM.AlarmEvent.DstMac
-      description: Destination MAC of the event
+      description: Destination MAC address of the event.
       type: string
     - contextPath: McAfeeESM.AlarmEvent.SrcMac
-      description: Source MAC of the event
+      description: Source MAC address of the event.
       type: string
     - contextPath: McAfeeESM.AlarmEvent.DstPort
-      description: Destination port of the event
+      description: Destination port of the event.
       type: string
     - contextPath: McAfeeESM.AlarmEvent.SrcPort
-      description: Source port of the event
+      description: Source port of the event.
       type: string
     - contextPath: McAfeeESM.AlarmEvent.FirstTime
-      description: The first time for the event
+      description: The first time for the event.
       type: date
     - contextPath: McAfeeESM.AlarmEvent.NormalizedDescription
-      description: Normalized description of the event
+      description: Normalized description of the event.
       type: string
   - arguments:
     - default: true
-      description: The alarm to get the details for. the ID can be taken from the
-        esm-fetch-alarms
+      description: The alarm for which to get the details. Run the esm-fetch-alarms command to get the ID.
       isArray: false
       name: alarmId
       required: true
       secret: false
     deprecated: false
-    description: Gets an event list related to the alarm
+    description: Gets a list of events related to the alarm.
     execution: false
     name: esm-list-alarm-events
     outputs:
     - contextPath: McAfeeESM.AlarmEvent.ID
-      description: Event ID
+      description: Event ID.
       type: string
     - contextPath: McAfeeESM.AlarmEvent.SubType
-      description: Event Type
+      description: Event type.
       type: string
     - contextPath: McAfeeESM.AlarmEvent.Severity
-      description: Event Severity
+      description: Event severity.
       type: number
     - contextPath: McAfeeESM.AlarmEvent.Message
-      description: Event Message
+      description: Event message.
       type: string
     - contextPath: McAfeeESM.AlarmEvent.LastTime
-      description: Event Time
+      description: Event time.
       type: date
     - contextPath: McAfeeESM.AlarmEvent.SrcIP
-      description: Source IP of the event
+      description: Source IP of the event.
       type: string
     - contextPath: McAfeeESM.AlarmEvent.DstIP
-      description: Destination IP of the event
+      description: Destination IP of the event.
       type: string
     - contextPath: McAfeeESM.AlarmEvent.Cases
-      description: A list of related cases to the event
+      description: A list of cases related to the event.
       type: Unknown
     - contextPath: McAfeeESM.AlarmEvent.Cases.ID
-      description: Case ID
+      description: Case ID.
       type: string
     - contextPath: McAfeeESM.AlarmEvent.Cases.OpenTime
-      description: Case creation time
+      description: Case creation time.
       type: date
     - contextPath: McAfeeESM.AlarmEvent.Cases.Severity
-      description: Case severity
+      description: Case severity.
       type: number
     - contextPath: McAfeeESM.AlarmEvent.Cases.Status
-      description: Case status
+      description: Case status.
       type: string
     - contextPath: McAfeeESM.AlarmEvent.Cases.Summary
-      description: Case summary
+      description: Case summary.
       type: string
   dockerimage: demisto/python3:3.8.2.6981
   feed: false
