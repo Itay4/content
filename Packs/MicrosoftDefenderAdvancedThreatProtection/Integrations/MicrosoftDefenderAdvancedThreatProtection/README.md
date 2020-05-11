@@ -59,8 +59,8 @@ Microsoft Defender Advanced Threat Protection Get Machine Action Status
     | Severity to filter out alerts for fetching as incidents | The property values are, "Informational", "Low", "Medium" and "High". Comma-separated values supported. | Medium,High |
     | Trust any Certificate (Not Secure) | When selected, certificates are not checked. | N/A |
     | Use system proxy settings | Runs the integration instance using the proxy server (HTTP or HTTPS) that you defined in the server configuration. | https://proxyserver.com |
-    | First Fetch Timestamp | The first timestamp to be fetched in number, time unit format. | N/A |
-    | self-deployed | Use a self-deployed Azure Application. | 12 hours, 7 days |
+    | First Fetch Timestamp | The first timestamp to be fetched in number, time unit format. | 12 hours, 7 days |
+    | self-deployed | Use a self-deployed Azure Application. |  N/A |
 
 
 4. Click __Test__ to validate the URLs, token, and connection.
