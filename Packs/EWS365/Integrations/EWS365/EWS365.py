@@ -1,6 +1,7 @@
 import demistomock as demisto
 from CommonServerPython import *
 from CommonServerUserPython import *
+
 import sys
 import traceback
 import json
@@ -112,31 +113,7 @@ ITEMS_RESULTS_HEADERS = [
     "textBody",
 ]
 
-# Load integration params from demisto
-FOLDER_NAME = demisto.params().get("folder", "Inbox")
-IS_PUBLIC_FOLDER = demisto.params().get("isPublicFolder", False)
-ACCESS_TYPE = (
-    IMPERSONATION if demisto.params().get("impersonation", False) else DELEGATE
-)
-FETCH_ALL_HISTORY = demisto.params().get("fetchAllHistory", False)
-IS_TEST_MODULE = False
-BaseProtocol.TIMEOUT = int(demisto.params().get("requestTimeout", 120))
-MARK_AS_READ = demisto.params().get("markAsRead", False)
-MAX_FETCH = min(50, int(demisto.params().get("maxFetch", 50)))
-LAST_RUN_IDS_QUEUE_SIZE = 500
-
-# initialized in main()
-USERNAME = ""
-PASSWORD = ""
-config = None
-credentials = None
-
-PUBLIC_FOLDERS_ERROR = "Please update your docker image to use public folders"
-if IS_PUBLIC_FOLDER and exchangelib.__version__ != "1.12.0":
-    if demisto.command() == "test-module":
-        demisto.results(PUBLIC_FOLDERS_ERROR)
-        exit(3)
-    raise Exception(PUBLIC_FOLDERS_ERROR)
+""" Classes """
 
 
 class EWSClient:
@@ -147,18 +124,29 @@ class EWSClient:
         folder="Inbox",
         is_public_folder=False,
         impersonation=False,
-        fetch_all_history=False,
-        requset_timeout="120",
+        request_timeout="120",
         mark_as_read=False,
         max_fetch="50",
         insecure=True,
         **kwargs
     ):
-        BaseProtocol.TIMEOUT = int(requset_timeout)
+        """
+        Client used to communicate with EWS
+        :param default_target_mailbox: Email address from which to fetch incidents
+        :param credentials: Email address + Password
+        :param folder: Name of the folder from which to fetch incidents
+        :param is_public_folder: Public Folder flag
+        :param impersonation: Has impersonation rights flag
+        :param request_timeout: Timeout (in seconds) for HTTP requests to Exchange Server
+        :param mark_as_read: Mark fetched emails as read
+        :param max_fetch: Max incidents per fetch
+        :param insecure: Trust any certificate (not secure)
+        """
+        BaseProtocol.TIMEOUT = int(request_timeout)
+
         self.folder_name = folder
         self.is_public_folder = is_public_folder
         self.access_type = IMPERSONATION if impersonation else DELEGATE
-        self.fetch_all_history = fetch_all_history
         self.mark_as_read = mark_as_read
         self.max_fetch = min(50, int(max_fetch))
         self.last_run_ids_queue_size = 500
@@ -166,25 +154,276 @@ class EWSClient:
             self.username = ""
             self.password = ""
         elif isinstance(credentials, dict):
-            self.username = credentials.get('username')
+            self.username = credentials.get('identifier')
             self.password = credentials.get('password')
-        self.ews_server = "https://outlook.office365.com/EWS/Exchange.asmx/"
         self.account_email = default_target_mailbox
-        self.config, self.credentials = prepare(insecure)
+        self.ews_server = "https://outlook.office365.com/EWS/Exchange.asmx/"
+        self.config = self.__prepare(insecure)
+        self.protocol = BaseProtocol(self.config)
 
-    def get_account(self, target_mailbox=None, access_type=ACCESS_TYPE):
+    def __prepare(self, insecure):
+        handle_proxy()
+        if insecure:
+            BaseProtocol.HTTP_ADAPTER_CLS = NoVerifyHTTPAdapter
+
+        # todo: replace with OAuth2
+        self.credentials = credentials = Credentials(username=self.username, password=self.password)
+        config_args = {
+            "credentials": credentials,
+            "auth_type": BASIC,
+            "version": Version(EXCHANGE_O365),
+            "service_endpoint": "https://outlook.office365.com/EWS/Exchange.asmx",
+        }
+
+        return Configuration(**config_args)
+
+    def get_account(self, target_mailbox=None, access_type=None):
         if not target_mailbox:
             target_mailbox = self.account_email
+        if not access_type:
+            access_type = self.access_type
         return Account(
             primary_smtp_address=target_mailbox,
             autodiscover=False,
-            config=config,
+            config=self.config,
             access_type=access_type,
         )
 
+    def get_items_from_mailbox(self, account, item_ids):
+        # allow user to pass target_mailbox as account
+        if isinstance(account, str):
+            account = self.get_account(account)
+        if type(item_ids) is not list:
+            item_ids = [item_ids]
+        items = [Item(id=x) for x in item_ids]
+        result = list(account.fetch(ids=items))
+        result = [x for x in result if not isinstance(x, ErrorItemNotFound)]
+        if len(result) != len(item_ids):
+            raise Exception("One or more items were not found. Check the input item ids")
+        return result
 
-# NOTE: Same method used in EWSMailSender
-# If you are modifying this probably also need to modify in the other file
+    def get_item_from_mailbox(self, account, item_id):
+        result = self.get_items_from_mailbox(account, [item_id])
+        if len(result) == 0:
+            raise Exception(f"ItemId {str(item_id)} not found")
+        return result[0]
+
+    def get_attachments_for_item(self, item_id, account, attachment_ids=None):
+        item = self.get_item_from_mailbox(account, item_id)
+        attachments = []
+        attachment_ids = argToList(attachment_ids)
+        if item:
+            if item.attachments:
+                for attachment in item.attachments:
+                    if attachment_ids and attachment.attachment_id.id not in attachment_ids:
+                        continue
+                    attachments.append(attachment)
+
+        else:
+            raise Exception("Message item not found: " + item_id)
+
+        if attachment_ids and len(attachments) < len(attachment_ids):
+            raise Exception(
+                "Some attachment id did not found for message:" + str(attachment_ids)
+            )
+
+        return attachments
+
+    def is_default_folder(self, folder_path, is_public):
+        if is_public is not None:
+            return is_public
+
+        if folder_path == self.folder_name:
+            return self.is_public_folder
+
+        return False
+
+
+class MarkAsJunk(EWSAccountService):
+    SERVICE_NAME = "MarkAsJunk"
+
+    def call(self, item_id, move_item):
+        elements = list(
+            self._get_elements(
+                payload=self.get_payload(item_id=item_id, move_item=move_item)
+            )
+        )
+        for element in elements:
+            if isinstance(element, ResponseMessageError):
+                return element.message
+        return "Success"
+
+    def get_payload(self, item_id, move_item):
+        junk = create_element(
+            f"m:{self.SERVICE_NAME}",
+            IsJunk="true",
+            MoveItem="true" if move_item else "false",
+        )
+
+        items_list = create_element("m:ItemIds")
+        item_element = create_element("t:ItemId", Id=item_id)
+        items_list.append(item_element)
+        junk.append(items_list)
+
+        return junk
+
+
+class GetSearchableMailboxes(EWSService):
+    SERVICE_NAME = "GetSearchableMailboxes"
+    element_container_name = f"{MNS}SearchableMailboxes"
+
+    @staticmethod
+    def parse_element(element):
+        return {
+            MAILBOX: element.find(f"{TNS}PrimarySmtpAddress").text
+            if element.find(f"{TNS}PrimarySmtpAddress") is not None
+            else None,
+            MAILBOX_ID: element.find(f"{TNS}ReferenceId").text
+            if element.find(f"{TNS}ReferenceId") is not None
+            else None,
+            "displayName": element.find(f"{TNS}DisplayName").text
+            if element.find(f"{TNS}DisplayName") is not None
+            else None,
+            "isExternal": element.find(f"{TNS}IsExternalMailbox").text
+            if element.find(f"{TNS}IsExternalMailbox") is not None
+            else None,
+            "externalEmailAddress": element.find(f"{TNS}ExternalEmailAddress").text
+            if element.find(f"{TNS}ExternalEmailAddress") is not None
+            else None,
+        }
+
+    def call(self):
+        elements = self._get_elements(payload=self.get_payload())
+        return [self.parse_element(x) for x in elements]
+
+    def get_payload(self):
+        element = create_element(f"m:{self.SERVICE_NAME}",)
+        return element
+
+
+class SearchMailboxes(EWSService):
+    SERVICE_NAME = "SearchMailboxes"
+    element_container_name = f"{MNS}SearchMailboxesResult/{TNS}Items"
+
+    @staticmethod
+    def parse_element(element):
+        to_recipients = element.find(f"{TNS}ToRecipients")
+        if to_recipients:
+            to_recipients = [x.text if x is not None else None for x in to_recipients]
+
+        result = {
+            ITEM_ID: element.find(f"{TNS}Id").attrib["Id"]
+            if element.find(f"{TNS}Id") is not None
+            else None,
+            MAILBOX: element.find(
+                f"{TNS}Mailbox/{TNS}PrimarySmtpAddress"
+            ).text
+            if element.find(f"{TNS}Mailbox/{TNS}PrimarySmtpAddress")
+            is not None
+            else None,
+            "subject": element.find(f"{TNS}Subject").text
+            if element.find(f"{TNS}Subject") is not None
+            else None,
+            "toRecipients": to_recipients,
+            "sender": element.find(f"{TNS}Sender").text
+            if element.find(f"{TNS}Sender") is not None
+            else None,
+            "hasAttachments": element.find(f"{TNS}HasAttachment").text
+            if element.find(f"{TNS}HasAttachment") is not None
+            else None,
+            "datetimeSent": element.find(f"{TNS}SentTime").text
+            if element.find(f"{TNS}SentTime") is not None
+            else None,
+            "datetimeReceived": element.find(f"{TNS}ReceivedTime").text
+            if element.find(f"{TNS}ReceivedTime") is not None
+            else None,
+        }
+
+        return result
+
+    def call(self, query, mailboxes):
+        elements = list(self._get_elements(payload=self.get_payload(query, mailboxes)))
+        return [self.parse_element(x) for x in elements]
+
+    def get_payload(self, query, mailboxes):
+        def get_mailbox_search_scope(mailbox_id):
+            mailbox_search_scope = create_element("t:MailboxSearchScope")
+            add_xml_child(mailbox_search_scope, "t:Mailbox", mailbox_id)
+            add_xml_child(mailbox_search_scope, "t:SearchScope", "All")
+            return mailbox_search_scope
+
+        mailbox_query_element = create_element("t:MailboxQuery")
+        add_xml_child(mailbox_query_element, "t:Query", query)
+        mailboxes_scopes = []
+        for mailbox in mailboxes:
+            mailboxes_scopes.append(get_mailbox_search_scope(mailbox))
+        add_xml_child(mailbox_query_element, "t:MailboxSearchScopes", mailboxes_scopes)
+
+        element = create_element(f"m:{self.SERVICE_NAME}")
+        add_xml_child(element, "m:SearchQueries", mailbox_query_element)
+        add_xml_child(element, "m:ResultType", "PreviewOnly")
+
+        return element
+
+
+class ExpandGroup(EWSService):
+    SERVICE_NAME = "ExpandDL"
+    element_container_name = f"{MNS}DLExpansion"
+
+    @staticmethod
+    def parse_element(element):
+        return {
+            MAILBOX: element.find(f"{TNS}EmailAddress").text
+            if element.find(f"{TNS}EmailAddress") is not None
+            else None,
+            "displayName": element.find(f"{TNS}Name").text
+            if element.find(f"{TNS}Name") is not None
+            else None,
+            "mailboxType": element.find(f"{TNS}MailboxType").text
+            if element.find(f"{TNS}MailboxType") is not None
+            else None,
+        }
+
+    def call(self, email_address, recursive_expansion=False):
+        try:
+            if recursive_expansion == "True":
+                group_members = {}  # type: dict
+                self.expand_group_recursive(email_address, group_members)
+                return list(group_members.values())
+            else:
+                return self.expand_group(email_address)
+        except ErrorNameResolutionNoResults:
+            demisto.results("No results were found.")
+            sys.exit()
+
+    def get_payload(self, email_address):
+        element = create_element(f"m:{self.SERVICE_NAME}")
+        mailbox_element = create_element("m:Mailbox")
+        add_xml_child(mailbox_element, "t:EmailAddress", email_address)
+        element.append(mailbox_element)
+        return element
+
+    def expand_group(self, email_address):
+        elements = self._get_elements(payload=self.get_payload(email_address))
+        return [self.parse_element(x) for x in elements]
+
+    def expand_group_recursive(self, email_address, non_dl_emails, dl_emails=set()):
+        if email_address in non_dl_emails or email_address in dl_emails:
+            return None
+        dl_emails.add(email_address)
+
+        for member in self.expand_group(email_address):
+            if (
+                member["mailboxType"] == "PublicDL"
+                or member["mailboxType"] == "PrivateDL"
+            ):
+                self.expand_group_recursive(member["mailbox"], non_dl_emails, dl_emails)
+            else:
+                if member["mailbox"] not in non_dl_emails:
+                    non_dl_emails[member["mailbox"]] = member
+
+
+# If you are modifying this probably also need to modify in other files
 def exchangelib_cleanup():
     key_protocols = list(exchangelib.protocol.CachingProtocol._protocol_cache.items())
     try:
@@ -211,28 +450,6 @@ def exchangelib_cleanup():
             demisto.error("Error with thread_pool.terminate, ignoring: {}".format(ex))
 
 
-""" Prep Functions """
-
-
-def prepare(insecure):
-    handle_proxy()
-    if insecure:
-        BaseProtocol.HTTP_ADAPTER_CLS = NoVerifyHTTPAdapter
-
-    # todo: replace with OAuth2
-    credentials = Credentials(username=USERNAME, password=PASSWORD)
-    config_args = {
-        "credentials": credentials,
-        "auth_type": BASIC,
-        "version": Version(EXCHANGE_O365),
-        "service_endpoint": "https://outlook.office365.com/EWS/Exchange.asmx",
-    }
-
-    return Configuration(**config_args), None
-
-
-
-
 """ LOGGING """
 
 log_stream = None
@@ -252,10 +469,7 @@ def start_logging():
         logger.setLevel(logging.DEBUG)
 
 
-def filter_dict_null(d):
-    if isinstance(d, dict):
-        return dict((k, v) for k, v in list(d.items()) if v is not None)
-    return d
+""" Helper Functions """
 
 
 def get_attachment_name(attachment_name):
@@ -267,9 +481,6 @@ def get_attachment_name(attachment_name):
 def get_entry_for_object(title, context_key, obj, headers=None):
     if len(obj) == 0:
         return "There is no output results"
-    obj = filter_dict_null(obj)
-    if isinstance(obj, list):
-        obj = list(map(filter_dict_null, obj))
     if headers and isinstance(obj, dict):
         headers = list(set(headers).intersection(set(obj.keys())))
 
@@ -281,34 +492,6 @@ def get_entry_for_object(title, context_key, obj, headers=None):
         "HumanReadable": tableToMarkdown(title, obj, headers),
         "EntryContext": {context_key: obj},
     }
-
-
-def get_items_from_mailbox(account, item_ids):
-    if type(item_ids) is not list:
-        item_ids = [item_ids]
-    items = [Item(id=x) for x in item_ids]
-    result = list(account.fetch(ids=items))
-    result = [x for x in result if not isinstance(x, ErrorItemNotFound)]
-    if len(result) != len(item_ids):
-        raise Exception("One or more items were not found. Check the input item ids")
-    return result
-
-
-def get_item_from_mailbox(account, item_id):
-    result = get_items_from_mailbox(account, [item_id])
-    if len(result) == 0:
-        raise Exception("ItemId %s not found" % str(item_id))
-    return result[0]
-
-
-def is_default_folder(folder_path, is_public):
-    if is_public is not None:
-        return is_public
-
-    if folder_path == FOLDER_NAME:
-        return IS_PUBLIC_FOLDER
-
-    return False
 
 
 def get_folder_by_path(account, path, is_public=False):
@@ -333,229 +516,44 @@ def get_folder_by_path(account, path, is_public=False):
             if x.name.lower() == sub_folder_name.lower()
         ]
         if len(folder_filter_by_name) == 0:
-            raise Exception("No such folder %s" % path)
+            raise Exception(f"No such folder {path}")
         folder_result = folder_filter_by_name[0]
 
     return folder_result
 
 
-class MarkAsJunk(EWSAccountService):
-    SERVICE_NAME = "MarkAsJunk"
-
-    def call(self, item_id, move_item):
-        elements = list(
-            self._get_elements(
-                payload=self.get_payload(item_id=item_id, move_item=move_item)
-            )
-        )
-        for element in elements:
-            if isinstance(element, ResponseMessageError):
-                return element.message
-        return "Success"
-
-    def get_payload(self, item_id, move_item):
-        junk = create_element(
-            "m:%s" % self.SERVICE_NAME,
-            IsJunk="true",
-            MoveItem="true" if move_item else "false",
-        )
-
-        items_list = create_element("m:ItemIds")
-        item_element = create_element("t:ItemId", Id=item_id)
-        items_list.append(item_element)
-        junk.append(items_list)
-
-        return junk
-
-
-class GetSearchableMailboxes(EWSService):
-    SERVICE_NAME = "GetSearchableMailboxes"
-    element_container_name = "{%s}SearchableMailboxes" % MNS
-
-    @staticmethod
-    def parse_element(element):
-        return {
-            MAILBOX: element.find("{%s}PrimarySmtpAddress" % TNS).text
-            if element.find("{%s}PrimarySmtpAddress" % TNS) is not None
-            else None,
-            MAILBOX_ID: element.find("{%s}ReferenceId" % TNS).text
-            if element.find("{%s}ReferenceId" % TNS) is not None
-            else None,
-            "displayName": element.find("{%s}DisplayName" % TNS).text
-            if element.find("{%s}DisplayName" % TNS) is not None
-            else None,
-            "isExternal": element.find("{%s}IsExternalMailbox" % TNS).text
-            if element.find("{%s}IsExternalMailbox" % TNS) is not None
-            else None,
-            "externalEmailAddress": element.find("{%s}ExternalEmailAddress" % TNS).text
-            if element.find("{%s}ExternalEmailAddress" % TNS) is not None
-            else None,
-        }
-
-    def call(self):
-        elements = self._get_elements(payload=self.get_payload())
-        return [self.parse_element(x) for x in elements]
-
-    def get_payload(self):
-        element = create_element("m:%s" % self.SERVICE_NAME,)
-        return element
-
-
-class SearchMailboxes(EWSService):
-    SERVICE_NAME = "SearchMailboxes"
-    element_container_name = "{%s}SearchMailboxesResult/{%s}Items" % (MNS, TNS)
-
-    @staticmethod
-    def parse_element(element):
-        to_recipients = element.find("{%s}ToRecipients" % TNS)
-        if to_recipients:
-            to_recipients = [x.text if x is not None else None for x in to_recipients]
-
-        result = {
-            ITEM_ID: element.find("{%s}Id" % TNS).attrib["Id"]
-            if element.find("{%s}Id" % TNS) is not None
-            else None,
-            MAILBOX: element.find(
-                "{%s}Mailbox/{%s}PrimarySmtpAddress" % (TNS, TNS)
-            ).text
-            if element.find("{%s}Mailbox/{%s}PrimarySmtpAddress" % (TNS, TNS))
-            is not None
-            else None,
-            "subject": element.find("{%s}Subject" % TNS).text
-            if element.find("{%s}Subject" % TNS) is not None
-            else None,
-            "toRecipients": to_recipients,
-            "sender": element.find("{%s}Sender" % TNS).text
-            if element.find("{%s}Sender" % TNS) is not None
-            else None,
-            "hasAttachments": element.find("{%s}HasAttachment" % TNS).text
-            if element.find("{%s}HasAttachment" % TNS) is not None
-            else None,
-            "datetimeSent": element.find("{%s}SentTime" % TNS).text
-            if element.find("{%s}SentTime" % TNS) is not None
-            else None,
-            "datetimeReceived": element.find("{%s}ReceivedTime" % TNS).text
-            if element.find("{%s}ReceivedTime" % TNS) is not None
-            else None,
-        }
-
-        return result
-
-    def call(self, query, mailboxes):
-        elements = list(self._get_elements(payload=self.get_payload(query, mailboxes)))
-        return [self.parse_element(x) for x in elements]
-
-    def get_payload(self, query, mailboxes):
-        def get_mailbox_search_scope(mailbox_id):
-            mailbox_search_scope = create_element("t:MailboxSearchScope")
-            add_xml_child(mailbox_search_scope, "t:Mailbox", mailbox_id)
-            add_xml_child(mailbox_search_scope, "t:SearchScope", "All")
-            return mailbox_search_scope
-
-        mailbox_query_element = create_element("t:MailboxQuery")
-        add_xml_child(mailbox_query_element, "t:Query", query)
-        mailboxes_scopes = []
-        for mailbox in mailboxes:
-            mailboxes_scopes.append(get_mailbox_search_scope(mailbox))
-        add_xml_child(mailbox_query_element, "t:MailboxSearchScopes", mailboxes_scopes)
-
-        element = create_element("m:%s" % self.SERVICE_NAME)
-        add_xml_child(element, "m:SearchQueries", mailbox_query_element)
-        add_xml_child(element, "m:ResultType", "PreviewOnly")
-
-        return element
-
-
-class ExpandGroup(EWSService):
-    SERVICE_NAME = "ExpandDL"
-    element_container_name = "{%s}DLExpansion" % MNS
-
-    @staticmethod
-    def parse_element(element):
-        return {
-            MAILBOX: element.find("{%s}EmailAddress" % TNS).text
-            if element.find("{%s}EmailAddress" % TNS) is not None
-            else None,
-            "displayName": element.find("{%s}Name" % TNS).text
-            if element.find("{%s}Name" % TNS) is not None
-            else None,
-            "mailboxType": element.find("{%s}MailboxType" % TNS).text
-            if element.find("{%s}MailboxType" % TNS) is not None
-            else None,
-        }
-
-    def call(self, email_address, recursive_expansion=False):
-        try:
-            if recursive_expansion == "True":
-                group_members = {}  # type: dict
-                self.expand_group_recursive(email_address, group_members)
-                return list(group_members.values())
-            else:
-                return self.expand_group(email_address)
-        except ErrorNameResolutionNoResults:
-            demisto.results("No results were found.")
-            sys.exit()
-
-    def get_payload(self, email_address):
-        element = create_element("m:%s" % self.SERVICE_NAME,)
-        mailbox_element = create_element("m:Mailbox")
-        add_xml_child(mailbox_element, "t:EmailAddress", email_address)
-        element.append(mailbox_element)
-        return element
-
-    def expand_group(self, email_address):
-        elements = self._get_elements(payload=self.get_payload(email_address))
-        return [self.parse_element(x) for x in elements]
-
-    def expand_group_recursive(self, email_address, non_dl_emails, dl_emails=set()):
-        if email_address in non_dl_emails or email_address in dl_emails:
-            return None
-        dl_emails.add(email_address)
-
-        for member in self.expand_group(email_address):
-            if (
-                member["mailboxType"] == "PublicDL"
-                or member["mailboxType"] == "PrivateDL"
-            ):
-                self.expand_group_recursive(member["mailbox"], non_dl_emails, dl_emails)
-            else:
-                if member["mailbox"] not in non_dl_emails:
-                    non_dl_emails[member["mailbox"]] = member
-
-
-def get_expanded_group(protocol, email_address, recursive_expansion=False):
-    group_members = ExpandGroup(protocol=protocol).call(
+def get_expanded_group(client, email_address, recursive_expansion=False):
+    group_members = ExpandGroup(protocol=client.protocol).call(
         email_address, recursive_expansion
     )
     group_details = {"name": email_address, "members": group_members}
-    entry_for_object = get_entry_for_object(
-        "Expanded group", "EWS.ExpandGroup", group_details
-    )
-    entry_for_object["HumanReadable"] = tableToMarkdown("Group Members", group_members)
-    return entry_for_object
+    output = {
+        "EWS.ExpandGroup": group_details
+    }
+    readable_output = tableToMarkdown("Group Members", group_members)
+    return readable_output, output, group_details
 
 
-def get_searchable_mailboxes(protocol):
-    searchable_mailboxes = GetSearchableMailboxes(protocol=protocol).call()
-    return get_entry_for_object(
-        "Searchable mailboxes", "EWS.Mailboxes", searchable_mailboxes
-    )
+def get_searchable_mailboxes(client: EWSClient):
+    searchable_mailboxes = GetSearchableMailboxes(protocol=client.protocol).call()
+    readable_output = tableToMarkdown("Searchable mailboxes", searchable_mailboxes)
+    output = {"EWS.Mailboxes": searchable_mailboxes}
+    return readable_output, output, searchable_mailboxes
 
 
 def search_mailboxes(
-    protocol, filter, limit=100, mailbox_search_scope=None, email_addresses=None
+    client: EWSClient, filter, limit=100, mailbox_search_scope=None, email_addresses=None
 ):
     mailbox_ids = []
     limit = int(limit)
+    protocol = client.protocol
     if mailbox_search_scope is not None and email_addresses is not None:
         raise Exception(
             "Use one of the arguments - mailbox-search-scope or email-addresses, not both"
         )
     if email_addresses:
         email_addresses = email_addresses.split(",")
-        all_mailboxes = get_searchable_mailboxes(protocol)["EntryContext"][
-            "EWS.Mailboxes"
-        ]
+        all_mailboxes = GetSearchableMailboxes(protocol=protocol).call()
         for email_address in email_addresses:
             for mailbox in all_mailboxes:
                 if (
@@ -574,10 +572,10 @@ def search_mailboxes(
             else [mailbox_search_scope]
         )
     else:
-        entry = get_searchable_mailboxes(protocol)
+        entry = GetSearchableMailboxes(protocol=protocol).call()
         mailboxes = [
             x
-            for x in entry["EntryContext"]["EWS.Mailboxes"]
+            for x in entry
             if MAILBOX_ID in list(x.keys())
         ]
         mailbox_ids = [x[MAILBOX_ID] for x in mailboxes]
@@ -591,15 +589,15 @@ def search_mailboxes(
         else:
             raise e
 
-    return get_entry_for_object(
-        "Search mailboxes results", CONTEXT_UPDATE_EWS_ITEM, search_results
-    )
+    readable_output = tableToMarkdown("Search mailboxes results", search_results)
+    output = {CONTEXT_UPDATE_EWS_ITEM: search_results}
+    return readable_output, output, search_results
 
 
-def get_last_run():
+def get_last_run(client: EWSClient):
     last_run = demisto.getLastRun()
-    if not last_run or last_run.get(LAST_RUN_FOLDER) != FOLDER_NAME:
-        last_run = {LAST_RUN_TIME: None, LAST_RUN_FOLDER: FOLDER_NAME, LAST_RUN_IDS: []}
+    if not last_run or last_run.get(LAST_RUN_FOLDER) != client.folder_name:
+        last_run = {LAST_RUN_TIME: None, LAST_RUN_FOLDER: client.folder_name, LAST_RUN_IDS: []}
     if LAST_RUN_TIME in last_run and last_run[LAST_RUN_TIME] is not None:
         last_run[LAST_RUN_TIME] = EWSDateTime.from_string(last_run[LAST_RUN_TIME])
 
@@ -611,17 +609,17 @@ def get_last_run():
 
 
 def fetch_last_emails(
-    account, folder_name="Inbox", since_datetime=None, exclude_ids=None
+    client: EWSClient, folder_name="Inbox", since_datetime=None, exclude_ids=None
 ):
-    qs = get_folder_by_path(account, folder_name, is_public=IS_PUBLIC_FOLDER)
+    account = client.get_account()
+    qs = get_folder_by_path(account, folder_name, is_public=client.is_public_folder)
     if since_datetime:
         qs = qs.filter(datetime_received__gte=since_datetime)
     else:
-        if not FETCH_ALL_HISTORY:
-            last_10_min = EWSDateTime.now(tz=EWSTimeZone.timezone("UTC")) - timedelta(
-                minutes=10
-            )
-            qs = qs.filter(datetime_received__gte=last_10_min)
+        last_10_min = EWSDateTime.now(tz=EWSTimeZone.timezone("UTC")) - timedelta(
+            minutes=10
+        )
+        qs = qs.filter(datetime_received__gte=last_10_min)
     qs = qs.filter().only(*[x.name for x in Message.FIELDS])
     qs = qs.filter().order_by("datetime_received")
 
@@ -778,12 +776,9 @@ def parse_item_as_dict(item, email_address, camel_case=False, compact_fields=Fal
             "is_read",
         ]
 
-        # Docker BC
-        # if exchangelib.__version__ == "1.12.0":
-        #     if "id" in raw_dict:
-        #         new_dict["item_id"] = raw_dict["id"] todo: remove if need be
-        # else:
-        fields_list.append("item_id")
+        if "id" in raw_dict:
+            new_dict["item_id"] = raw_dict["id"]
+            fields_list.append("item_id")
 
         for field in fields_list:
             if field in raw_dict:
@@ -817,7 +812,7 @@ def parse_item_as_dict(item, email_address, camel_case=False, compact_fields=Fal
     return raw_dict
 
 
-def parse_incident_from_item(item, is_fetch):
+def parse_incident_from_item(client: EWSClient, item, is_fetch=False):
     incident = {}
     labels = []
 
@@ -966,7 +961,7 @@ def parse_incident_from_item(item, is_fetch):
     if item.conversation_id:
         labels.append({"type": "Email/ConversionID", "value": item.conversation_id.id})
 
-    if MARK_AS_READ and is_fetch:
+    if client.mark_as_read and is_fetch:
         item.is_read = True
         try:
             item.save()
@@ -980,28 +975,27 @@ def parse_incident_from_item(item, is_fetch):
     return incident
 
 
-def fetch_emails_as_incidents(client: EWSClient, folder_name):
-    last_run = get_last_run()
+def fetch_emails_as_incidents(client: EWSClient):
+    last_run = get_last_run(client)
 
     try:
-        account = client.get_account()
         last_emails = fetch_last_emails(
-            account,
-            folder_name,
+            client,
+            client.folder_name,
             last_run.get(LAST_RUN_TIME),
             last_run.get(LAST_RUN_IDS),
         )
 
-        ids = deque(last_run.get(LAST_RUN_IDS, []), maxlen=LAST_RUN_IDS_QUEUE_SIZE)
+        ids = deque(last_run.get(LAST_RUN_IDS, []), maxlen=client.last_run_ids_queue_size)
         incidents = []
         incident = {}  # type: Dict[Any, Any]
         for item in last_emails:
             if item.message_id:
                 ids.append(item.message_id)
-                incident = parse_incident_from_item(item, True)
+                incident = parse_incident_from_item(client, item, is_fetch=True)
                 incidents.append(incident)
 
-                if len(incidents) >= MAX_FETCH:
+                if len(incidents) >= client.max_fetch:
                     break
 
         last_run_time = incident.get("occurred", last_run.get(LAST_RUN_TIME))
@@ -1010,7 +1004,7 @@ def fetch_emails_as_incidents(client: EWSClient, folder_name):
 
         new_last_run = {
             LAST_RUN_TIME: last_run_time,
-            LAST_RUN_FOLDER: folder_name,
+            LAST_RUN_FOLDER: client.folder_name,
             LAST_RUN_IDS: list(ids),
             ERROR_COUNTER: 0,
         }
@@ -1032,11 +1026,10 @@ def fetch_emails_as_incidents(client: EWSClient, folder_name):
 
 def get_entry_for_file_attachment(item_id, attachment):
     entry = fileResult(get_attachment_name(attachment.name), attachment.content)
-    ec = {
+    entry["EntryContext"] = {
         CONTEXT_UPDATE_EWS_ITEM_FOR_ATTACHMENT
         + CONTEXT_UPDATE_FILE_ATTACHMENT: parse_attachment_as_dict(item_id, attachment)
     }
-    entry["EntryContext"] = filter_dict_null(ec)
     return entry
 
 
@@ -1090,10 +1083,7 @@ def get_entry_for_item_attachment(item_id, attachment, target_email):
     dict_result.update(
         parse_item_as_dict(item, target_email, camel_case=True, compact_fields=True)
     )
-    title = 'EWS get attachment got item for "%s", "%s"' % (
-        target_email,
-        get_attachment_name(attachment.name),
-    )
+    title = f'EWS get attachment got item for "{target_email}", "{get_attachment_name(attachment.name)}"'
 
     return get_entry_for_object(
         title,
@@ -1102,32 +1092,8 @@ def get_entry_for_item_attachment(item_id, attachment, target_email):
     )
 
 
-def get_attachments_for_item(item_id, account, attachment_ids=None):
-    item = get_item_from_mailbox(account, item_id)
-    attachments = []
-    if attachment_ids and not isinstance(attachment_ids, list):
-        attachment_ids = attachment_ids.split(",")
-    if item:
-        if item.attachments:
-            for attachment in item.attachments:
-                if attachment_ids and attachment.attachment_id.id not in attachment_ids:
-                    continue
-                attachments.append(attachment)
-
-    else:
-        raise Exception("Message item not found: " + item_id)
-
-    if attachment_ids and len(attachments) < len(attachment_ids):
-        raise Exception(
-            "Some attachment id did not found for message:" + str(attachment_ids)
-        )
-
-    return attachments
-
-
 def delete_attachments_for_message(client: EWSClient, item_id, target_mailbox=None, attachment_ids=None):
-    account = client.get_account(target_mailbox)
-    attachments = get_attachments_for_item(item_id, account, attachment_ids)
+    attachments = client.get_attachments_for_item(item_id, target_mailbox, attachment_ids)
     deleted_file_attachments = []
     deleted_item_attachments = []  # type: ignore
     for attachment in attachments:
@@ -1162,7 +1128,7 @@ def delete_attachments_for_message(client: EWSClient, item_id, target_mailbox=No
 
 def fetch_attachments_for_message(client: EWSClient, item_id, target_mailbox=None, attachment_ids=None):
     account = client.get_account(target_mailbox)
-    attachments = get_attachments_for_item(item_id, account, attachment_ids)
+    attachments = client.get_attachments_for_item(item_id, account, attachment_ids)
     entries = []
     for attachment in attachments:
         if isinstance(attachment, FileAttachment):
@@ -1199,11 +1165,11 @@ def move_item_between_mailboxes(
 ):
     source_account = client.get_account(source_mailbox)
     destination_account = client.get_account(destination_mailbox)
-    is_public = is_default_folder(destination_folder_path, is_public)
+    is_public = client.is_default_folder(destination_folder_path, is_public)
     destination_folder = get_folder_by_path(
         destination_account, destination_folder_path, is_public
     )
-    item = get_item_from_mailbox(source_account, item_id)
+    item = client.get_item_from_mailbox(source_account, item_id)
 
     exported_items = source_account.export([item])
     destination_account.upload([(destination_folder, exported_items[0])])
@@ -1213,20 +1179,16 @@ def move_item_between_mailboxes(
         MOVED_TO_MAILBOX: destination_mailbox,
         MOVED_TO_FOLDER: destination_folder_path,
     }
-
-    return {
-        "Type": entryTypes["note"],
-        "Contents": "Item was moved successfully.",
-        "ContentsFormat": formats["text"],
-        "EntryContext": {"EWS.Items(val.itemId === '%s')" % (item_id,): move_result},
-    }
+    readable_output = "Item was moved successfully."
+    output = {f"EWS.Items(val.itemId === '{item_id}')": move_result}
+    return readable_output, output, move_result
 
 
 def move_item(client: EWSClient, item_id, target_folder_path, target_mailbox=None, is_public=None):
     account = client.get_account(target_mailbox)
-    is_public = is_default_folder(target_folder_path, is_public)
+    is_public = client.is_default_folder(target_folder_path, is_public)
     target_folder = get_folder_by_path(account, target_folder_path, is_public)
-    item = get_item_from_mailbox(account, item_id)
+    item = client.get_item_from_mailbox(account, item_id)
     if isinstance(item, ErrorInvalidIdMalformed):
         raise Exception("Item not found")
     item.move(target_folder)
@@ -1236,16 +1198,15 @@ def move_item(client: EWSClient, item_id, target_folder_path, target_mailbox=Non
         MESSAGE_ID: item.message_id,
         ACTION: "moved",
     }
-
-    return get_entry_for_object("Moved items", CONTEXT_UPDATE_EWS_ITEM, move_result)
+    readable_output = tableToMarkdown("Moved items", move_result)
+    output = {CONTEXT_UPDATE_EWS_ITEM: move_result}
+    return readable_output, output, move_result
 
 
 def delete_items(client: EWSClient, item_ids, delete_type, target_mailbox=None):
-    account = client.get_account(target_mailbox)
     deleted_items = []
-    if type(item_ids) != list:
-        item_ids = item_ids.split(",")
-    items = get_items_from_mailbox(account, item_ids)
+    item_ids = argToList(item_ids)
+    items = client.get_items_from_mailbox(target_mailbox, item_ids)
     delete_type = delete_type.lower()
 
     for item in items:
@@ -1268,11 +1229,9 @@ def delete_items(client: EWSClient, item_ids, delete_type, target_mailbox=None):
             }
         )
 
-    return get_entry_for_object(
-        f"Deleted items ({delete_type} delete type)",
-        CONTEXT_UPDATE_EWS_ITEM,
-        deleted_items,
-    )
+    readable_output = tableToMarkdown(f"Deleted items ({delete_type} delete type)", deleted_items)
+    output = {CONTEXT_UPDATE_EWS_ITEM: deleted_items}
+    return readable_output, output, deleted_items
 
 
 def prepare_args(d):
@@ -1315,7 +1274,7 @@ def search_items_in_mailbox(
     if folder_path.lower() == "inbox":
         folders = [account.inbox]
     elif folder_path:
-        is_public = is_default_folder(folder_path, is_public)
+        is_public = client.is_default_folder(folder_path, is_public)
         folders = [get_folder_by_path(account, folder_path, is_public)]
     else:
         folders = account.inbox.parent.walk()  # pylint: disable=E1101
@@ -1360,12 +1319,9 @@ def search_items_in_mailbox(
         for item in searched_items_result:
             item["itemId"] = item.pop("id", "")
 
-    return get_entry_for_object(
-        "Searched items",
-        CONTEXT_UPDATE_EWS_ITEM,
-        searched_items_result,
-        headers=ITEMS_RESULTS_HEADERS if selected_all_fields else None,
-    )
+    readable_output = tableToMarkdown("Searched items", searched_items_result, headers=ITEMS_RESULTS_HEADERS if selected_all_fields else None,)
+    output = {CONTEXT_UPDATE_EWS_ITEM: searched_items_result}
+    return readable_output, output, searched_items_result
 
 
 def get_out_of_office_state(client: EWSClient, target_mailbox=None):
@@ -1380,18 +1336,16 @@ def get_out_of_office_state(client: EWSClient, target_mailbox=None):
         "externalReply": getattr(oof, "external_replay", None),
         MAILBOX: account.primary_smtp_address,
     }
-    return get_entry_for_object(
-        "Out of office state for %s" % account.primary_smtp_address,
-        "Account.Email(val.Address == obj.{0}).OutOfOffice".format(MAILBOX),
-        oof_dict,
-    )
+    readable_output = tableToMarkdown(f"Out of office state for {account.primary_smtp_address}", oof_dict)
+    output = {f"Account.Email(val.Address == obj.{MAILBOX}).OutOfOffice": oof_dict}
+    return readable_output, output, oof_dict
 
 
 def recover_soft_delete_item(
     client: EWSClient, message_ids, target_folder_path="Inbox", target_mailbox=None, is_public=None
 ):
     account = client.get_account(target_mailbox)
-    is_public = is_default_folder(target_folder_path, is_public)
+    is_public = client.is_default_folder(target_folder_path, is_public)
     target_folder = get_folder_by_path(account, target_folder_path, is_public)
     recovered_messages = []
     if type(message_ids) != list:
@@ -1406,9 +1360,9 @@ def recover_soft_delete_item(
         recovered_messages.append(
             {ITEM_ID: item.item_id, MESSAGE_ID: item.message_id, ACTION: "recovered"}
         )
-    return get_entry_for_object(
-        "Recovered messages", CONTEXT_UPDATE_EWS_ITEM, recovered_messages
-    )
+    readable_output = tableToMarkdown("Recovered messages", recovered_messages)
+    output = {CONTEXT_UPDATE_EWS_ITEM: recovered_messages}
+    return readable_output, output, recovered_messages
 
 
 def get_contacts(client: EWSClient, limit, target_mailbox=None):
@@ -1455,48 +1409,39 @@ def get_contacts(client: EWSClient, limit, target_mailbox=None):
 
     for contact in account.contacts.all()[: int(limit)]:  # pylint: disable=E1101
         contacts.append(parse_contact(contact))
-    return get_entry_for_object(
-        "Email contacts for %s" % target_mailbox,
-        "Account.Email(val.Address == obj.originMailbox).EwsContacts",
-        contacts,
-    )
+    readable_output = tableToMarkdown(f"Email contacts for {target_mailbox}", contacts)
+    output = {"Account.Email(val.Address == obj.originMailbox).EwsContacts": contacts}
+    return readable_output, output, contacts
 
 
 def create_folder(client: EWSClient, new_folder_name, folder_path, target_mailbox=None):
     account = client.get_account(target_mailbox)
-    full_path = "%s\\%s" % (folder_path, new_folder_name)
+    full_path = os.path.join(folder_path, new_folder_name)
     try:
         if get_folder_by_path(account, full_path):
-            return "Folder %s already exists" % full_path
+            return f"Folder {full_path} already exists"
     except Exception:
         pass
     parent_folder = get_folder_by_path(account, folder_path)
     f = Folder(parent=parent_folder, name=new_folder_name)
     f.save()
     get_folder_by_path(account, full_path)
-    return "Folder %s created successfully" % full_path
+    return f"Folder {full_path} created successfully"
 
 
 def find_folders(client: EWSClient, target_mailbox=None):
     account = client.get_account(target_mailbox)
     root = account.root
-    # if exchangelib.__version__ == "1.12.0":  # Docker BC
-    #     if is_public:
-    #         root = account.public_folders_root todo: remove if need be
+    if client.is_public_folder:
+        root = account.public_folders_root  # todo: search online
     folders = []
     for f in root.walk():  # pylint: disable=E1101
         folder = folder_to_context_entry(f)
         folders.append(folder)
     folders_tree = root.tree()  # pylint: disable=E1101
-
-    return {
-        "Type": entryTypes["note"],
-        "Contents": folders,
-        "ContentsFormat": formats["json"],
-        "ReadableContentsFormat": formats["text"],
-        "HumanReadable": folders_tree,
-        "EntryContext": {"EWS.Folders(val.id == obj.id)": folders},
-    }
+    readable_output = folders_tree
+    output = {"EWS.Folders(val.id == obj.id)": folders}
+    return readable_output, output, folders
 
 
 def mark_item_as_junk(client: EWSClient, item_id, move_items, target_mailbox=None):
@@ -1511,9 +1456,9 @@ def mark_item_as_junk(client: EWSClient, item_id, move_items, target_mailbox=Non
     else:
         raise Exception("Failed mark-item-as-junk with error: " + ews_result)
 
-    return get_entry_for_object(
-        "Mark item as junk", CONTEXT_UPDATE_EWS_ITEM, mark_as_junk_result
-    )
+    readable_output = tableToMarkdown("Mark item as junk", mark_as_junk_result)
+    output = {CONTEXT_UPDATE_EWS_ITEM: mark_as_junk_result}
+    return readable_output, output, mark_as_junk_result
 
 
 def get_items_from_folder(
@@ -1522,7 +1467,7 @@ def get_items_from_folder(
     account = client.get_account(target_mailbox)
     limit = int(limit)
     get_internal_item = get_internal_item == "yes"
-    is_public = is_default_folder(folder_path, is_public)
+    is_public = client.is_default_folder(folder_path, is_public)
     folder = get_folder_by_path(account, folder_path, is_public)
     qs = folder.filter().order_by("-datetime_created")[:limit]
     items = get_limited_number_of_messages_from_qs(qs, limit)
@@ -1559,50 +1504,37 @@ def get_items_from_folder(
     ]
     # if exchangelib.__version__ == "1.12.0":  # Docker BC
     #     hm_headers.append("itemId") todo: remove if need be
-    return get_entry_for_object(
-        "Items in folder " + folder_path,
-        CONTEXT_UPDATE_EWS_ITEM,
-        items_result,
-        headers=hm_headers,
-    )
+    readable_output = tableToMarkdown("Items in folder " + folder_path, items_result, headers=hm_headers)
+    output = {CONTEXT_UPDATE_EWS_ITEM: items_result}
+    return readable_output, output, items
 
 
 def get_items(client: EWSClient, item_ids, target_mailbox=None):
+    item_ids = argToList(item_ids)
     account = client.get_account(target_mailbox)
-    if type(item_ids) != list:
-        item_ids = item_ids.split(",")
-
-    items = get_items_from_mailbox(account, item_ids)
+    items = client.get_items_from_mailbox(account, item_ids)
     items = [x for x in items if isinstance(x, Message)]
-    items_as_incidents = [parse_incident_from_item(x, False) for x in items]
+    items_as_incidents = [parse_incident_from_item(client, x) for x in items]
     items_to_context = [
         parse_item_as_dict(x, account.primary_smtp_address, True, True) for x in items
     ]
-
-    return {
-        "Type": entryTypes["note"],
-        "Contents": items_as_incidents,
-        "ContentsFormat": formats["json"],
-        "ReadableContentsFormat": formats["markdown"],
-        "HumanReadable": tableToMarkdown(
-            "Get items", items_to_context, ITEMS_RESULTS_HEADERS
-        ),
-        "EntryContext": {
+    readable_output = tableToMarkdown("Get items", items_to_context, ITEMS_RESULTS_HEADERS)
+    output = {
             CONTEXT_UPDATE_EWS_ITEM: items_to_context,
             "Email": [email_ec(item) for item in items],
-        },
-    }
+        }
+    return readable_output, output, items_as_incidents
 
 
 def get_folder(client: EWSClient, folder_path, target_mailbox=None, is_public=None):
     account = client.get_account(target_mailbox)
-    is_public = is_default_folder(folder_path, is_public)
+    is_public = client.is_default_folder(folder_path, is_public)
     folder = folder_to_context_entry(
         get_folder_by_path(account, folder_path, is_public)
     )
-    return get_entry_for_object(
-        "Folder %s" % (folder_path,), CONTEXT_UPDATE_FOLDER, folder
-    )
+    readable_output = tableToMarkdown(f"Folder {folder_path}", folder)
+    output = {CONTEXT_UPDATE_FOLDER: folder}
+    return readable_output, output, folder
 
 
 def folder_to_context_entry(f):
@@ -1621,9 +1553,8 @@ def folder_to_context_entry(f):
 
 def mark_item_as_read(client: EWSClient, item_ids, operation="read", target_mailbox=None):
     marked_items = []
-    account = client.get_account(target_mailbox)
     item_ids = argToList(item_ids)
-    items = get_items_from_mailbox(account, item_ids)
+    items = client.get_items_from_mailbox(target_mailbox, item_ids)
     items = [x for x in items if isinstance(x, Message)]
 
     for item in items:
@@ -1638,16 +1569,14 @@ def mark_item_as_read(client: EWSClient, item_ids, operation="read", target_mail
             }
         )
 
-    return get_entry_for_object(
-        "Marked items ({} marked operation)".format(operation),
-        CONTEXT_UPDATE_EWS_ITEM,
-        marked_items,
-    )
+    readable_output = tableToMarkdown(f"Marked items ({operation} marked operation)", marked_items)
+    output = {CONTEXT_UPDATE_EWS_ITEM: marked_items}
+    return readable_output, output, marked_items
 
 
 def get_item_as_eml(client: EWSClient, item_id, target_mailbox=None):
     account = client.get_account(target_mailbox)
-    item = get_item_from_mailbox(account, item_id)
+    item = client.get_item_from_mailbox(account, item_id)
 
     if item.mime_content:
         email_content = email.message_from_string(item.mime_content)
@@ -1674,8 +1603,6 @@ def get_item_as_eml(client: EWSClient, item_id, target_mailbox=None):
 
 def test_module(client: EWSClient):
     try:
-        global IS_TEST_MODULE
-        IS_TEST_MODULE = True
         account = client.get_account()
         if not account.root.effective_rights.read:  # pylint: disable=E1101
             raise Exception(
@@ -1683,7 +1610,7 @@ def test_module(client: EWSClient):
                 "Need to delegate the user permissions to the mailbox - "
                 "please read integration documentation and follow the instructions"
             )
-        get_folder_by_path(account, FOLDER_NAME, IS_PUBLIC_FOLDER).test_access()
+        get_folder_by_path(account, client.folder_name, client.is_public_folder).test_access()
     except ErrorFolderNotFound as e:
         if "Top of Information Store" in str(e):
             raise Exception(
@@ -1696,63 +1623,55 @@ def test_module(client: EWSClient):
 
 
 def sub_main():
-    global USERNAME, PASSWORD
-    global config, credentials
+    is_test_module = False
     params = demisto.params()
     client = EWSClient(**params)
-    USERNAME = params.get("credentials", {})["identifier"]
-    PASSWORD = params.get("credentials", {})["password"]
-    insecure = params.get("insecure", True)
-    config, credentials = prepare(insecure)
-    protocol = BaseProtocol(config)
     args = prepare_args(demisto.args())
     start_logging()
     try:
-        if demisto.command() == "test-module":
+        command = demisto.command()
+        # commands that require no extra handling, and return a single note result
+        normal_commands = {
+            "ews-get-searchable-mailboxes": get_searchable_mailboxes,
+            "ews-search-mailboxes": search_mailboxes,
+            "ews-move-item-between-mailboxes": move_item_between_mailboxes,
+            "ews-move-item": move_item,
+            "ews-delete-items": delete_items,
+            "ews-search-mailbox": search_items_in_mailbox,
+            "ews-get-contacts": get_contacts,
+            "ews-get-out-of-office": get_out_of_office_state,
+            "ews-recover-messages": recover_soft_delete_item,
+            "ews-create-folder": create_folder,
+            "ews-mark-item-as-junk": mark_item_as_junk,
+            "ews-find-folders": find_folders,
+            "ews-get-items-from-folder": get_items_from_folder,
+            "ews-get-items": get_items,
+            "ews-get-folder": get_folder,
+            "ews-expand-group": get_expanded_group,
+            "ews-mark-items-as-read": mark_item_as_read
+        }
+
+        # commands that may return multiple results or non-note result
+        special_output_commands = {
+            "ews-get-attachment": fetch_attachments_for_message,
+            "ews-delete-attachment": delete_attachments_for_message,
+            "ews-get-items-as-eml": get_item_as_eml
+        }
+        # special commands:
+        if command == "test-module":
+            is_test_module = True
             test_module(client)
-        elif demisto.command() == "fetch-incidents":
-            incidents = fetch_emails_as_incidents(client, FOLDER_NAME)
+        elif command == "fetch-incidents":
+            incidents = fetch_emails_as_incidents(client)
             demisto.incidents(incidents)
-        elif demisto.command() == "ews-get-attachment":
-            demisto.results(fetch_attachments_for_message(client, **args))
-        elif demisto.command() == "ews-delete-attachment":
-            demisto.results(delete_attachments_for_message(client, **args))
-        elif demisto.command() == "ews-get-searchable-mailboxes":
-            demisto.results(get_searchable_mailboxes(protocol))
-        elif demisto.command() == "ews-search-mailboxes":
-            demisto.results(search_mailboxes(protocol, **args))
-        elif demisto.command() == "ews-move-item-between-mailboxes":
-            demisto.results(move_item_between_mailboxes(client, **args))
-        elif demisto.command() == "ews-move-item":
-            demisto.results(move_item(client, **args))
-        elif demisto.command() == "ews-delete-items":
-            demisto.results(delete_items(client, **args))
-        elif demisto.command() == "ews-search-mailbox":
-            demisto.results(search_items_in_mailbox(**args))
-        elif demisto.command() == "ews-get-contacts":
-            demisto.results(get_contacts(client, **args))
-        elif demisto.command() == "ews-get-out-of-office":
-            demisto.results(get_out_of_office_state(client, **args))
-        elif demisto.command() == "ews-recover-messages":
-            demisto.results(recover_soft_delete_item(client, **args))
-        elif demisto.command() == "ews-create-folder":
-            demisto.results(create_folder(client, **args))
-        elif demisto.command() == "ews-mark-item-as-junk":
-            demisto.results(mark_item_as_junk(client, **args))
-        elif demisto.command() == "ews-find-folders":
-            demisto.results(find_folders(**args))
-        elif demisto.command() == "ews-get-items-from-folder":
-            demisto.results(get_items_from_folder(client, **args))
-        elif demisto.command() == "ews-get-items":
-            demisto.results(get_items(client, **args))
-        elif demisto.command() == "ews-get-folder":
-            demisto.results(get_folder(**args))
-        elif demisto.command() == "ews-expand-group":
-            demisto.results(get_expanded_group(protocol, **args))
-        elif demisto.command() == "ews-mark-items-as-read":
-            demisto.results(mark_item_as_read(client, **args))
-        elif demisto.command() == "ews-get-items-as-eml":
-            demisto.results(get_item_as_eml(client, **args))
+
+        # special outputs commands
+        elif command in special_output_commands:
+            demisto.results(*special_output_commands[command](client, **args))  # type: ignore[operator]
+
+        # normal commands
+        else:
+            return_outputs(*normal_commands[command](client, **args))  # type: ignore[operator]
 
     except Exception as e:
         time.sleep(2)
@@ -1773,7 +1692,7 @@ def sub_main():
                 demisto.info(log_message)
                 demisto.incidents([])
                 sys.exit(0)
-            if IS_TEST_MODULE:
+            if is_test_module:
                 demisto.results(
                     log_message + " Please retry the instance configuration test."
                 )
@@ -1789,7 +1708,7 @@ def sub_main():
         if isinstance(e, ErrorInvalidPropertyRequest):
             error_message_simple = "Verify that the Exchange version is correct."
         else:
-            if IS_TEST_MODULE and isinstance(e, MalformedResponseError):
+            if is_test_module and isinstance(e, MalformedResponseError):
                 error_message_simple = (
                     "Got invalid response from the server.\n"
                     "Verify that the Hostname or IP address is is correct."
@@ -1828,7 +1747,7 @@ def sub_main():
                 message="Selected invalid field, please specify valid field name.",
                 error=e,
             )
-        if IS_TEST_MODULE:
+        if is_test_module:
             demisto.results(error_message_simple)
         else:
             demisto.results(
@@ -1838,7 +1757,7 @@ def sub_main():
                     "Contents": error_message_simple,
                 }
             )
-        demisto.error("%s: %s" % (e.__class__.__name__, error_message))
+        demisto.error(f"{e.__class__.__name__}: {error_message}")
     finally:
         exchangelib_cleanup()
         if log_stream:
