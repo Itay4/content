@@ -29,6 +29,9 @@ PASSWORD = demisto.params()['credentials']['password']
 USE_SSL = not demisto.params().get('insecure', False)
 FETCH_TIME = demisto.params().get('fetch_time', '')
 TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+if FETCH_TIME:
+    if FETCH_TIME[-1] != 'Z':
+        FETCH_TIME = FETCH_TIME + 'Z'
 
 INCIDENT_TYPE_DICT = {
     'CommunicationError': 17,
@@ -971,18 +974,13 @@ def fetch_incidents():
 
 
 def test():
-    """Verify that the first_fetch parameter is according to the standards.
+    """Verify that the first_fetch parameter is according to the standards, if exists.
 
     Returns:
         'ok' if test passed, anything else will fail the test.
     """
 
-    global FETCH_TIME
-
     if FETCH_TIME:
-        if FETCH_TIME[-1] != 'Z':
-            FETCH_TIME = FETCH_TIME + 'Z'
-
         try:
             datetime.strptime(FETCH_TIME, TIME_FORMAT)
         except ValueError as error:
