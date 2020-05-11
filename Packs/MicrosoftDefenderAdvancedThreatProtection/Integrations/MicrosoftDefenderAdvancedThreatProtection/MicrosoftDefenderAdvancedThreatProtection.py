@@ -1,14 +1,10 @@
 import demistomock as demisto
 from CommonServerPython import *
 from CommonServerUserPython import *
-import requests
-import base64
 from dateutil.parser import parse
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
-
+# Disable insecure warnings
 requests.packages.urllib3.disable_warnings()
-
 
 ''' GLOBAL VARS '''
 APP_NAME = 'ms-defender-atp'
@@ -455,7 +451,7 @@ class MsClient:
         cmd_url = f'/ips/{ip}/stats'
         return self.ms_client.http_request(method='GET', url_suffix=cmd_url)
 
-    def get_domain_alert(self, domain):
+    def get_domain_alerts(self, domain):
         """Retrieves a collection of Alerts related to a given domain address.
 
         Args:
@@ -707,10 +703,8 @@ def reformat_filter(fields_to_filter_by):
     Returns:
         string. Filter to send in the API request
     """
-    filter_req = ''
-    for field_key, field_value in fields_to_filter_by.items():
-        if field_value:
-            filter_req += f"{field_key}+eq+'{field_value}'&"
+    filter_req = ' and '.join(
+        f"{field_key} eq '{field_value}'" for field_key, field_value in fields_to_filter_by.items() if field_value)
     return filter_req
 
 
@@ -945,7 +939,7 @@ def get_alert_related_files_command(client: MsClient, args: dict):
     from_index = min(offset, len(response_files_list))
     to_index = min(offset + limit, len(response_files_list))
     for file_obj in response_files_list[from_index:to_index]:
-        files_data_list.append(get_file_data(file_obj))
+        files_data_list.append(client.get_file_data(file_obj))
 
     context_output = {
         'AlertID': alert_id,
@@ -1691,7 +1685,7 @@ def create_filter_alerts_creation_time(last_alert_fetched_time):
     return filter_alerts_creation_time
 
 
-def all_alerts_to_incidents(alerts, latest_creation_time, existing_ids,  alert_status_to_fetch,
+def all_alerts_to_incidents(alerts, latest_creation_time, existing_ids, alert_status_to_fetch,
                             alert_severities_to_fetch):
     """Gets the alerts list and convert it to incidents.
 
@@ -1711,7 +1705,7 @@ def all_alerts_to_incidents(alerts, latest_creation_time, existing_ids,  alert_s
         reformatted_alert_creation_time_for_incident = \
             aware_timestamp_to_naive_timestamp(alert_creation_time_for_incident)
 
-        if should_fetch_alert(alert, existing_ids,  alert_status_to_fetch, alert_severities_to_fetch):
+        if should_fetch_alert(alert, existing_ids, alert_status_to_fetch, alert_severities_to_fetch):
             incident = alert_to_incident(alert, reformatted_alert_creation_time_for_incident)
             incidents.append(incident)
 
@@ -1759,10 +1753,8 @@ def should_fetch_alert(alert, existing_ids, alert_status_to_fetch, alert_severit
     """
     alert_status = alert['status']
     alert_severity = alert['severity']
-    if alert_status in alert_status_to_fetch and alert_severity in alert_severities_to_fetch and alert['id'] \
-            not in existing_ids:
-        return True
-    return False
+    return (alert_status in alert_status_to_fetch
+            and alert_severity in str(alert_severities_to_fetch) and alert['id'] not in existing_ids)
 
 
 def get_last_alert_fetched_time(last_run, alert_time_to_fetch):
@@ -1784,7 +1776,7 @@ def get_last_alert_fetched_time(last_run, alert_time_to_fetch):
 def test_module(client: MsClient):
     try:
         client.ms_client.http_request(method='GET', url_suffix='/alerts', params={'$top': '1'})
-    except Exception as err:
+    except Exception:
         raise DemistoException(
             f"API call to Windows Advanced Threat Protection failed. \n Please check authentication related parameters")
     return 'ok'
@@ -1920,8 +1912,7 @@ def main():
         return_error(str(err))
 
 
-# from MicrosoftApiModule import *  # noqa: E402
-
+from MicrosoftApiModule import *  # noqa: E402
 
 if __name__ in ("__main__", "__builtin__", "builtins"):
     main()
