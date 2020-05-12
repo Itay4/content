@@ -601,15 +601,6 @@ tasks:
             value:
               simple: McAfeeESM.Case.ID
             iscontext: true
-      - - operator: isEqualString
-          left:
-            value:
-              simple: McAfeeESM.Case.ID
-            iscontext: true
-          right:
-            value:
-              simple: McAfeeESM.Case.ID
-            iscontext: true
       - - operator: isNotEmpty
           left:
             value:

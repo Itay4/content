@@ -3,13 +3,8 @@ commonfields:
   id: McAfee ESM v2
   version: -1
 configuration:
-- display: ESM IP (e.g. 78.125.0.209)
-  name: ip
-  required: true
-  type: 0
-- defaultvalue: '443'
-  display: Port
-  name: port
+- display: Base URL (e.g. https://example.com)
+  name: url
   required: true
   type: 0
 - display: Username
@@ -21,14 +16,6 @@ configuration:
   name: version
   required: true
   type: 0
-- display: Trust any certificate (not secure)
-  name: insecure
-  required: false
-  type: 8
-- display: Use system proxy settings
-  name: proxy
-  required: false
-  type: 8
 - display: Fetch incidents
   name: isFetch
   required: false
@@ -51,10 +38,22 @@ configuration:
   name: startingFetchID
   required: false
   type: 0
+- defaultvalue: '50'
+  display: Fetch cases limit
+  hidden: false
+  name: fetchLimitCases
+  required: false
+  type: 0
 - defaultvalue: 3 days
   display: First fetch timestamp (<number> <time unit>, e.g., 12 hours, 7 days, 3
     months, 1 year)
   name: fetchTime
+  required: false
+  type: 0
+- defaultvalue: '50'
+  display: Fetch alarms limit
+  hidden: false
+  name: fetchLimitAlarms
   required: false
   type: 0
 - defaultvalue: '0'
@@ -63,18 +62,14 @@ configuration:
   name: timezone
   required: false
   type: 0
-- defaultvalue: '5'
-  display: fetchLimitAlarms
-  hidden: false
-  name: fetchLimitAlarms
+- display: Trust any certificate (not secure)
+  name: insecure
   required: false
-  type: 0
-- defaultvalue: '5'
-  display: fetchLimitCases
-  hidden: false
-  name: fetchLimitCases
+  type: 8
+- display: Use system proxy settings
+  name: proxy
   required: false
-  type: 0
+  type: 8
 description: Run queries and receive alarms from Intel Security ESM. Support version
   10 and above.
 display: McAfee ESM v2

@@ -21,7 +21,7 @@ class McAfeeESMClient(BaseClient):
         self.difference = int(params.get('timezone', 0))
         self.version = params.get('version', '10.2')
         super(McAfeeESMClient, self).__init__(
-            'https://' + params.get('ip', '') + ':' + params.get('port', '443') + f'/rs/esm/v2/',
+            '{}/rs/esm/v2/'.format(params.get('url', '').strip('/')),
             proxy=params.get('proxy', False),
             verify=not params.get('insecure', False)
         )
@@ -84,7 +84,7 @@ class McAfeeESMClient(BaseClient):
             looking_for = user_id
         else:
             return {}
-        if not self.__cache['users']:
+        if not self.__cache.get('users'):
             _, _, self.__cache['users'] = self.get_user_list()
         for user in self.__cache['users']:
             if user.get(looking_in) == looking_for:
@@ -122,13 +122,18 @@ class McAfeeESMClient(BaseClient):
             looking_for = status_id
             looking_in = 'id'
         if not self.__cache['status']:
-            _, _, self.__cache['status'] = self.get_case_statuses(raw=True)
+            def filter_statuses_data(status_dict):
+                try:
+                    status_dict.pop('showInCasePane')
+                    status_dict.pop('default')
+                except KeyError:
+                    pass
+                return status_dict
+
+            self.__cache['status'] = list(map(filter_statuses_data, (self.get_case_statuses(raw=True))[2]))
         for status in self.__cache['status']:
             if status.get(looking_in) == looking_for:
-                return {
-                    'id': status.get('id'),
-                    'name': status.get('name')
-                }
+                return status
         demisto.log(f'{looking_for} is not a {looking_in}(status).')
         return {}
 
@@ -173,7 +178,7 @@ class McAfeeESMClient(BaseClient):
 
     def get_case_list(self, start_time: str = None, raw: bool = False) -> Tuple[str, Dict, List]:
         path = 'caseGetCaseList'
-        since = self.args.get('since')
+        since = self.args.get('since', '1 year')
         context_entry = []
         human_readable: str = ''
         if not raw and not start_time:
@@ -446,9 +451,7 @@ class McAfeeESMClient(BaseClient):
 
     def complete_search(self):
         time_out = self.args.get('timeOut', 30)
-        interval = 10
-        if time_out < interval:
-            raise ValueError('Time out to short.')
+        interval = min(10, time_out)
         search_id = self.__search()
         i = 0
         while not self.__generic_polling(search_id):
@@ -601,14 +604,14 @@ class McAfeeESMClient(BaseClient):
         else:
             current_run['time'] = current_time
             current_run['id'] = start_id
-        all_alarms = crate_incident(all_alarms, alarms=True)
+        all_alarms = create_incident(all_alarms, alarms=True)
         return all_alarms, current_run
 
     def __cases_to_incidents(self, start_id: int = 0, limit: int = 1) -> Tuple[List, Dict]:
         _, _, all_cases = self.get_case_list(raw=True)
         all_cases = filtering_incidents(all_cases, start_id=start_id, limit=limit)
         current_run = {'id': all_cases[0].get('id', start_id) if all_cases else start_id}
-        all_cases = crate_incident(all_cases, alarms=False)
+        all_cases = create_incident(all_cases, alarms=False)
         return all_cases, current_run
 
 
@@ -743,18 +746,19 @@ def search_readable_outputs(table: Dict) -> str:
         return ''
 
 
-def crate_incident(raw_incidents: List[Dict], alarms: bool) -> List[Dict[str, Dict]]:
-    for incident in range(len(raw_incidents)):
-        alarm_id = str(raw_incidents[incident].get('id'))
-        summary = str(raw_incidents[incident].get('summary'))
+def create_incident(raw_incidents: List[Dict], alarms: bool) -> List[Dict[str, Dict]]:
+    incidents = []
+    for incident in raw_incidents:
+        alarm_id = str(incident.get('id'))
+        summary = str(incident.get('summary'))
         incident_type = 'alarm' if alarms else 'case'
-        raw_incidents[incident] = {
+        incidents.append({
             'name': f'McAfee ESM {incident_type}. id: {alarm_id}. {summary}',
-            'severity': mcafee_severity_to_demisto(raw_incidents[incident].get('severity', 0)),
-            'occurred': raw_incidents[incident].get('triggeredDate', raw_incidents[incident].get('openTime', '')),
-            'rawJSON': json.dumps(raw_incidents[incident])
-        }
-    return raw_incidents
+            'severity': mcafee_severity_to_demisto(incident.get('severity', 0)),
+            'occurred': incident.get('triggeredDate', incident.get('openTime', '')),
+            'rawJSON': json.dumps(incident)
+        })
+    return incidents
 
 
 def mcafee_severity_to_demisto(severity: int) -> int:
@@ -773,32 +777,32 @@ def main():
     client = McAfeeESMClient(params)
     command = demisto.command()
     commands: Dict[str, Callable] = {
-        'test-module': McAfeeESMClient.test_module,
-        'esm-fetch-fields': McAfeeESMClient.fetch_fields,
-        'esm-get-organization-list': McAfeeESMClient.get_organization_list,
-        'esm-fetch-alarms': McAfeeESMClient.fetch_alarms,
-        'esm-add-case': McAfeeESMClient.add_case,
-        'esm-get-case-detail': McAfeeESMClient.get_case_detail,
-        'esm-edit-case': McAfeeESMClient.edit_case,
-        'esm-get-case-statuses': McAfeeESMClient.get_case_statuses,
-        'esm-edit-case-status': McAfeeESMClient.edit_case_status,
-        'esm-get-case-event-list': McAfeeESMClient.get_case_event_list,
-        'esm-add-case-status': McAfeeESMClient.add_case_status,
-        'esm-delete-case-status': McAfeeESMClient.delete_case_status,
-        'esm-get-case-list': McAfeeESMClient.get_case_list,
-        'esm-get-user-list': McAfeeESMClient.get_user_list,
-        'esm-acknowledge-alarms': McAfeeESMClient.acknowledge_alarms,
-        'esm-unacknowledge-alarms': McAfeeESMClient.unacknowledge_alarms,
-        'esm-delete-alarms': McAfeeESMClient.delete_alarm,
-        'esm-get-alarm-event-details': McAfeeESMClient.get_alarm_event_details,
-        'esm-list-alarm-events': McAfeeESMClient.list_alarm_events,
-        'esm-search': McAfeeESMClient.complete_search
+        'test-module': client.test_module,
+        'esm-fetch-fields': client.fetch_fields,
+        'esm-get-organization-list': client.get_organization_list,
+        'esm-fetch-alarms': client.fetch_alarms,
+        'esm-add-case': client.add_case,
+        'esm-get-case-detail': client.get_case_detail,
+        'esm-edit-case': client.edit_case,
+        'esm-get-case-statuses': client.get_case_statuses,
+        'esm-edit-case-status': client.edit_case_status,
+        'esm-get-case-event-list': client.get_case_event_list,
+        'esm-add-case-status': client.add_case_status,
+        'esm-delete-case-status': client.delete_case_status,
+        'esm-get-case-list': client.get_case_list,
+        'esm-get-user-list': client.get_user_list,
+        'esm-acknowledge-alarms': client.acknowledge_alarms,
+        'esm-unacknowledge-alarms': client.unacknowledge_alarms,
+        'esm-delete-alarms': client.delete_alarm,
+        'esm-get-alarm-event-details': client.get_alarm_event_details,
+        'esm-list-alarm-events': client.list_alarm_events,
+        'esm-search': client.complete_search
     }
     try:
         if command == 'fetch-incidents':
             client.fetch_incidents(params)
         elif command in commands:
-            human_readable, context_entry, raw_response = commands[command](client)
+            human_readable, context_entry, raw_response = commands[command]()
             return_outputs(human_readable, context_entry, raw_response)
         else:
             raise DemistoException(f'{command} is not a command.')
@@ -807,5 +811,5 @@ def main():
         return_error(str(error), error)
 
 
-if __name__ in ('__builtin__', 'builtins'):
+if __name__ in ('__main__', '__builtin__', 'builtins'):
     main()
