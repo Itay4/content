@@ -1,4 +1,5 @@
 ## [Unreleased]
+  - Fixed ipv4 regex to catch only ipv4 and ignore cidr ips
   - Added retry mechanism to the BaseClient.
   - Fixed an issue where the **appendContext** function did not behave as expected.
 
