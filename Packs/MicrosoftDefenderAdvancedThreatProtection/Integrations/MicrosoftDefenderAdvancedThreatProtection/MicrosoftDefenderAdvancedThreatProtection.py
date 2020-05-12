@@ -1779,7 +1779,7 @@ def test_module(client: MsClient):
     except Exception:
         raise DemistoException(
             f"API call to Windows Advanced Threat Protection failed. \n Please check authentication related parameters")
-    return 'ok', None, None
+    demisto.results('ok')
 
 
 ''' EXECUTION CODE '''
@@ -1808,7 +1808,7 @@ def main():
             alert_status_to_fetch=alert_status_to_fetch, alert_time_to_fetch=alert_time_to_fetch)
 
         if demisto.command() == 'test-module':
-            return_outputs(test_module(client))
+            test_module(client)
 
         elif demisto.command() == 'fetch-incidents':
             fetch_incidents(client, last_run)
